@@ -1,0 +1,2 @@
+import NagataFactoriality.Nagata.Lemmas
+import NagataFactoriality.Nagata.Theorem

@@ -6,4 +6,3 @@ package «NagataFactoriality» where
 
 @[default_target]
 lean_lib «NagataFactoriality» where
-  srcDir := "NagataFactoriality"
