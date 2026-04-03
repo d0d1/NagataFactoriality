@@ -25,6 +25,8 @@ abbrev AddCommGroup := Lean.Grind.AddCommGroup
 abbrev Ring := Lean.Grind.Ring
 abbrev CommRing := Lean.Grind.CommRing
 
+attribute [instance 100] Lean.Grind.Semiring.natCast Lean.Grind.Ring.intCast
+
 instance instCommMonoidOfCommRing {α : Type _} [CommRing α] : CommMonoid α where
   one_mul := Semiring.one_mul
   mul_one := Semiring.mul_one

@@ -89,6 +89,10 @@ theorem associated_trans {α : Type _} [CommRing α] {a b c : α} :
   refine ⟨u * v, isUnit_mul hu hv, ?_⟩
   grind
 
+theorem dvd_of_associated {α : Type _} [CommRing α] {a b : α} (h : Associated a b) : dvd a b := by
+  rcases h with ⟨u, _, hu⟩
+  exact ⟨u, hu⟩
+
 def Irreducible {α : Type _} [IntegralDomain α] (p : α) : Prop :=
   p ≠ 0 ∧ ¬ IsUnit p ∧ ∀ a b : α, p = a * b → IsUnit a ∨ IsUnit b
 
