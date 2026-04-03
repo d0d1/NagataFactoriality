@@ -359,7 +359,7 @@ theorem prime_of_localization_prime {α : Type _} [IntegralDomain α] {S : MultS
 
 theorem nagata_key_lemma {α : Type _} [IntegralDomain α] {S : MultSet α}
     (hS : MultSet.GeneratedByPrimes S) (hUFD : UFD (α := Localization S))
-    {p : α} (hp : Irreducible p) (_hpS : ¬ S p) : Prime p := by
+    {p : α} (hp : Irreducible p) : Prime p := by
   by_cases hmem : ∃ s : α, S s ∧ dvd p s
   · rcases hmem with ⟨s, hs, hdiv⟩
     exact prime_of_irreducible_of_dvd_generated_primes hS hp hs hdiv
