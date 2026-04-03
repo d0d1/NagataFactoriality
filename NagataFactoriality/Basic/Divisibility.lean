@@ -33,6 +33,18 @@ theorem dvd_trans {α : Type _} [CommRing α] {a b c : α} :
   refine ⟨u * v, ?_⟩
   grind
 
+theorem dvd_mul_of_dvd_left {α : Type _} [CommRing α] {a b c : α} :
+    dvd a b → dvd a (b * c) := by
+  rintro ⟨u, hu⟩
+  refine ⟨u * c, ?_⟩
+  grind
+
+theorem dvd_mul_of_dvd_right {α : Type _} [CommRing α] {a b c : α} :
+    dvd a c → dvd a (b * c) := by
+  rintro ⟨u, hu⟩
+  refine ⟨b * u, ?_⟩
+  grind
+
 def IsUnit {α : Type _} [CommRing α] (a : α) : Prop := ∃ b, a * b = 1
 
 theorem isUnit_one {α : Type _} [CommRing α] : IsUnit (1 : α) := by
@@ -44,6 +56,11 @@ theorem isUnit_mul {α : Type _} [CommRing α] {a b : α} :
   rintro ⟨u, hu⟩ ⟨v, hv⟩
   refine ⟨u * v, ?_⟩
   grind
+
+theorem isUnit_of_dvd_one {α : Type _} [CommRing α] {a : α} (h : dvd a 1) : IsUnit a := by
+  rcases h with ⟨u, hu⟩
+  refine ⟨u, ?_⟩
+  simpa [CommSemiring.mul_comm] using hu.symm
 
 theorem isUnit_ne_zero {α : Type _} [IntegralDomain α] {a : α} (ha : IsUnit a) : a ≠ 0 := by
   intro h0
@@ -108,5 +125,67 @@ theorem prime_irreducible {α : Type _} [IntegralDomain α] {p : α} (hp : Prime
       grind
     have hone : 1 = a * c := IntegralDomain.mul_left_cancel₀ hp0 hcancel
     grind
+
+theorem associated_of_irreducible_of_dvd {α : Type _} [IntegralDomain α] {p q : α}
+    (hp : Irreducible p) (hq : Irreducible q) (hdiv : dvd p q) : Associated p q := by
+  rcases hdiv with ⟨c, hc⟩
+  refine ⟨c, ?_, hc⟩
+  rcases hp with ⟨_, hpnu, _⟩
+  rcases hq with ⟨_, _, hqirr⟩
+  have hfact : q = p * c := by simpa [CommSemiring.mul_comm] using hc
+  rcases hqirr p c hfact with hpunit | hcunit
+  · exact False.elim (hpnu hpunit)
+  · exact hcunit
+
+theorem prime_of_associated {α : Type _} [IntegralDomain α] {p q : α}
+    (hp : Prime p) (hassoc : Associated p q) : Prime q := by
+  rcases hp with ⟨hp0, hpnu, hpdiv⟩
+  rcases hassoc with ⟨u, hu, hq⟩
+  rcases hu with ⟨v, huv⟩
+  refine ⟨?_, ?_, ?_⟩
+  · intro hq0
+    have hu0 : u ≠ 0 := isUnit_ne_zero ⟨v, huv⟩
+    have hpzero : p = 0 := by
+      apply IntegralDomain.mul_right_cancel₀ hu0
+      grind
+    exact hp0 hpzero
+  · intro hqu
+    apply hpnu
+    rcases hqu with ⟨w, hqw⟩
+    refine ⟨u * w, ?_⟩
+    have : p * (u * w) = 1 := by
+      calc
+        p * (u * w) = (p * u) * w := by grind
+        _ = q * w := by rw [hq]
+        _ = 1 := hqw
+    simpa [Semiring.mul_assoc] using this
+  · intro a b hqdiv
+    rcases hqdiv with ⟨c, hqc⟩
+    have hpab : dvd p (a * b) := by
+      refine ⟨u * c, ?_⟩
+      grind
+    rcases hpdiv a b hpab with hpa | hpb
+    · rcases hpa with ⟨d, hd⟩
+      left
+      refine ⟨v * d, ?_⟩
+      have hmul : q * (v * d) = a := by
+        calc
+          q * (v * d) = (p * u) * (v * d) := by rw [hq]
+          _ = p * (u * (v * d)) := by grind
+          _ = p * ((u * v) * d) := by grind
+          _ = p * (1 * d) := by rw [huv]
+          _ = a := by grind
+      simpa [Semiring.mul_assoc] using hmul.symm
+    · rcases hpb with ⟨d, hd⟩
+      right
+      refine ⟨v * d, ?_⟩
+      have hmul : q * (v * d) = b := by
+        calc
+          q * (v * d) = (p * u) * (v * d) := by rw [hq]
+          _ = p * (u * (v * d)) := by grind
+          _ = p * ((u * v) * d) := by grind
+          _ = p * (1 * d) := by rw [huv]
+          _ = b := by grind
+      simpa [Semiring.mul_assoc] using hmul.symm
 
 end NagataFactoriality

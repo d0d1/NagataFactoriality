@@ -65,4 +65,56 @@ theorem mul_left_cancel₀ {a b c : α} (hc : c ≠ 0) (h : c * a = c * b) : a =
 
 end IntegralDomain
 
+structure RingHom (α : Type _) (β : Type _) [CommRing α] [CommRing β] where
+  toFun : α → β
+  map_zero' : toFun 0 = 0
+  map_one' : toFun 1 = 1
+  map_add' : ∀ a b : α, toFun (a + b) = toFun a + toFun b
+  map_mul' : ∀ a b : α, toFun (a * b) = toFun a * toFun b
+
+attribute [coe] RingHom.toFun
+
+instance {α : Type _} {β : Type _} [CommRing α] [CommRing β] :
+    CoeFun (RingHom α β) (fun _ => α → β) := ⟨RingHom.toFun⟩
+
+namespace RingHom
+
+variable {α : Type _} {β : Type _} {γ : Type _}
+variable [CommRing α] [CommRing β] [CommRing γ]
+
+@[simp] theorem map_zero (f : RingHom α β) : f 0 = 0 :=
+  f.map_zero'
+
+@[simp] theorem map_one (f : RingHom α β) : f 1 = 1 :=
+  f.map_one'
+
+@[simp] theorem map_add (f : RingHom α β) (a b : α) : f (a + b) = f a + f b :=
+  f.map_add' a b
+
+@[simp] theorem map_mul (f : RingHom α β) (a b : α) : f (a * b) = f a * f b :=
+  f.map_mul' a b
+
+@[ext] theorem ext {f g : RingHom α β} (h : ∀ a : α, f a = g a) : f = g := by
+  cases f
+  cases g
+  simp at h
+  cases funext h
+  rfl
+
+def comp (g : RingHom β γ) (f : RingHom α β) : RingHom α γ where
+  toFun a := g (f a)
+  map_zero' := by simp
+  map_one' := by simp
+  map_add' a b := by simp
+  map_mul' a b := by simp
+
+def id (α : Type _) [CommRing α] : RingHom α α where
+  toFun a := a
+  map_zero' := rfl
+  map_one' := rfl
+  map_add' _ _ := rfl
+  map_mul' _ _ := rfl
+
+end RingHom
+
 end NagataFactoriality
