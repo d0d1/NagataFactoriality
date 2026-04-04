@@ -3,14 +3,14 @@ import NagataFactoriality.Basic.UFD
 
 namespace NagataFactoriality
 
-theorem ufd_irreducible_iff_prime {α : Type _} [IntegralDomain α]
+theorem ufd_irreducible_iff_prime {α : Type _} [CommRing α] [IsDomain α]
     (h : UFD (α := α)) {p : α} : Irreducible p ↔ Prime p := by
   exact (prime_iff_irreducible_of_ufd h (p := p)).symm
 
-def Avoids {α : Type _} [IntegralDomain α] (S : MultSet α) (p : α) : Prop :=
-  ∀ s : α, S s → ¬ dvd p s
+def Avoids {α : Type _} [CommRing α] [IsDomain α] (S : MultSet α) (p : α) : Prop :=
+  ∀ s : α, S s → ¬ p ∣ s
 
-theorem localization_of_eq_zero_iff {α : Type _} [IntegralDomain α] {S : MultSet α} (a : α) :
+theorem localization_of_eq_zero_iff {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α} (a : α) :
     Localization.of (S := S) a = (Zero.zero : Localization S) ↔ a = 0 := by
   constructor
   · intro h
@@ -19,40 +19,40 @@ theorem localization_of_eq_zero_iff {α : Type _} [IntegralDomain α] {S : MultS
     subst h
     exact Localization.of_zero (S := S)
 
-theorem localization_mk_mul_of {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem localization_mk_mul_of {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     (a b s : α) (hs : S s) :
     Localization.mk (S := S) (a * b) s hs =
       Localization.mk (S := S) a s hs * Localization.of (S := S) b := by
   exact Localization.mk_mul_of (S := S) a b s hs
 
-theorem localization_isUnit_of_mem {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem localization_isUnit_of_mem {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     {s : α} (hs : S s) : IsUnit (Localization.of (S := S) s) := by
   exact Localization.isUnit_of_mem (S := S) hs
 
-theorem localization_isUnit_mk_of_mem {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem localization_isUnit_mk_of_mem {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     {a s : α} (ha : S a) (hs : S s) : IsUnit (Localization.mk (S := S) a s hs) := by
   exact Localization.isUnit_mk_of_mem (S := S) ha hs
 
-theorem localization_isUnit_of_isUnit {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem localization_isUnit_of_isUnit {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     {a : α} (ha : IsUnit a) : IsUnit (Localization.of (S := S) a) := by
   exact Localization.isUnit_of_isUnit (S := S) ha
 
-theorem generatedByPrimes_to_list {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem generatedByPrimes_to_list {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     (hS : MultSet.GeneratedByPrimes S) {s : α} (hs : S s) :
     ∃ qs : List α, listProd qs = s ∧ ∀ q : α, q ∈ qs → S q ∧ Prime q := by
   exact MultSet.generatedBy_to_list (hS s hs)
 
-theorem prime_of_irreducible_of_dvd_listProd_primes {α : Type _} [IntegralDomain α]
+theorem prime_of_irreducible_of_dvd_listProd_primes {α : Type _} [CommRing α] [IsDomain α]
     {qs : List α} {p : α} (hp : Irreducible p)
-    (hqs : ∀ q : α, q ∈ qs → Prime q) (hdiv : dvd p (listProd qs)) : Prime p := by
+    (hqs : ∀ q : α, q ∈ qs → Prime q) (hdiv : p ∣ listProd qs) : Prime p := by
   induction qs generalizing p with
   | nil =>
       exfalso
-      exact hp.2.1 (isUnit_of_dvd_one (by simpa using hdiv))
+      exact hp.not_isUnit (isUnit_of_dvd_one (by simpa using hdiv))
   | cons q qs ih =>
       have hq : Prime q := hqs q (by simp)
       rcases hdiv with ⟨c, hc⟩
-      have hqdiv : dvd q (p * c) := by
+      have hqdiv : q ∣ p * c := by
         refine ⟨listProd qs, ?_⟩
         simpa [listProd] using hc.symm
       rcases hq.2.2 p c hqdiv with hqp | hqc
@@ -61,31 +61,31 @@ theorem prime_of_irreducible_of_dvd_listProd_primes {α : Type _} [IntegralDomai
         exact prime_of_associated hq hassoc
       · rcases hqc with ⟨d, hd⟩
         have q0 : q ≠ 0 := hq.1
-        have hrest : dvd p (listProd qs) := by
+        have hrest : p ∣ listProd qs := by
           refine ⟨d, ?_⟩
           have hcancel : q * listProd qs = q * (p * d) := by
             calc
               q * listProd qs = p * c := by simpa [listProd] using hc
               _ = p * (q * d) := by rw [hd]
               _ = q * (p * d) := by grind
-          exact IntegralDomain.mul_left_cancel₀ q0 hcancel
+          exact mul_left_cancel₀ q0 hcancel
         apply ih hp
         · intro r hr
           exact hqs r (by simp [hr])
         · exact hrest
 
-theorem prime_of_irreducible_of_dvd_generated_primes {α : Type _} [IntegralDomain α]
+theorem prime_of_irreducible_of_dvd_generated_primes {α : Type _} [CommRing α] [IsDomain α]
     {S : MultSet α} (hS : MultSet.GeneratedByPrimes S) {p s : α}
-    (hp : Irreducible p) (hs : S s) (hdiv : dvd p s) : Prime p := by
+    (hp : Irreducible p) (hs : S s) (hdiv : p ∣ s) : Prime p := by
   rcases generatedByPrimes_to_list hS hs with ⟨qs, hqs, hprime⟩
   apply prime_of_irreducible_of_dvd_listProd_primes hp
   · intro q hq
     exact (hprime q hq).2
   · simpa [hqs] using hdiv
 
-theorem dvd_of_mul_listProd_eq {α : Type _} [IntegralDomain α] {qs : List α} {a c p : α}
-    (hp : Irreducible p) (havoid : ∀ q : α, q ∈ qs → ¬ dvd p q)
-    (hqs : ∀ q : α, q ∈ qs → Prime q) (h : a * listProd qs = p * c) : dvd p a := by
+theorem dvd_of_mul_listProd_eq {α : Type _} [CommRing α] [IsDomain α] {qs : List α} {a c p : α}
+    (hp : Irreducible p) (havoid : ∀ q : α, q ∈ qs → ¬ p ∣ q)
+    (hqs : ∀ q : α, q ∈ qs → Prime q) (h : a * listProd qs = p * c) : p ∣ a := by
   induction qs generalizing a c with
   | nil =>
       refine ⟨c, ?_⟩
@@ -94,7 +94,7 @@ theorem dvd_of_mul_listProd_eq {α : Type _} [IntegralDomain α] {qs : List α} 
       exact h'
   | cons q qs ih =>
       have hq : Prime q := hqs q (by simp)
-      have hqdiv : dvd q (p * c) := by
+      have hqdiv : q ∣ p * c := by
         refine ⟨a * listProd qs, ?_⟩
         calc
           p * c = a * listProd (q :: qs) := h.symm
@@ -114,7 +114,7 @@ theorem dvd_of_mul_listProd_eq {α : Type _} [IntegralDomain α] {qs : List α} 
               _ = p * c := h
               _ = p * (q * d) := by rw [hd]
               _ = q * (p * d) := by grind
-          exact IntegralDomain.mul_left_cancel₀ q0 hcancel
+          exact mul_left_cancel₀ q0 hcancel
         apply ih
         · intro r hr
           exact havoid r (by simp [hr])
@@ -122,7 +122,7 @@ theorem dvd_of_mul_listProd_eq {α : Type _} [IntegralDomain α] {qs : List α} 
           exact hqs r (by simp [hr])
         · exact hrest
 
-theorem split_listProd_primes_across_product {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem split_listProd_primes_across_product {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     {qs : List α} {a b p : α}
     (hqs : ∀ q : α, q ∈ qs → S q ∧ Prime q) (h : a * b = p * listProd qs) :
     ∃ xs ys : List α, ∃ a' b' : α,
@@ -147,7 +147,7 @@ theorem split_listProd_primes_across_product {α : Type _} [IntegralDomain α] {
   | cons q qs ih =>
       have hqSq : S q := (hqs q (by simp)).1
       have hqPrime : Prime q := (hqs q (by simp)).2
-      have hqdiv : dvd q (a * b) := by
+      have hqdiv : q ∣ a * b := by
         refine ⟨p * listProd qs, ?_⟩
         calc
           a * b = p * listProd (q :: qs) := h
@@ -163,7 +163,7 @@ theorem split_listProd_primes_across_product {α : Type _} [IntegralDomain α] {
               _ = p * listProd (q :: qs) := h
               _ = p * (q * listProd qs) := by simp [listProd]
               _ = q * (p * listProd qs) := by grind
-          exact IntegralDomain.mul_left_cancel₀ q0 hcancel
+          exact mul_left_cancel₀ q0 hcancel
         rcases ih (a := d) (b := b) (p := p)
             (fun r hr => hqs r (by simp [hr])) hrest with
           ⟨xs, ys, a', b', hxs, hys, hprod, ha, hb, hab⟩
@@ -190,7 +190,7 @@ theorem split_listProd_primes_across_product {α : Type _} [IntegralDomain α] {
               _ = p * listProd (q :: qs) := h
               _ = p * (q * listProd qs) := by simp [listProd]
               _ = q * (p * listProd qs) := by grind
-          exact IntegralDomain.mul_left_cancel₀ q0 hcancel
+          exact mul_left_cancel₀ q0 hcancel
         rcases ih (a := a) (b := d) (p := p)
             (fun r hr => hqs r (by simp [hr])) hrest with
           ⟨xs, ys, a', b', hxs, hys, hprod, ha, hb, hab⟩
@@ -209,21 +209,18 @@ theorem split_listProd_primes_across_product {α : Type _} [IntegralDomain α] {
             _ = q * (listProd ys * b') := by rw [hb]
             _ = listProd (q :: ys) * b' := by simp [listProd]; grind
 
-theorem localization_irreducible_of_irreducible {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem localization_irreducible_of_irreducible {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     (hS : MultSet.GeneratedByPrimes S) {p : α} (hp : Irreducible p)
     (havoid : Avoids S p) : Irreducible (Localization.of (S := S) p) := by
-  refine ⟨?_, ?_, ?_⟩
-  · change Localization.of (S := S) p ≠ (Zero.zero : Localization S)
-    intro hp0
-    exact hp.1 ((localization_of_eq_zero_iff (S := S) p).mp hp0)
+  refine ⟨?_, ?_⟩
   · intro hunit
-    rcases hunit with ⟨x, hx⟩
+    rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
     refine Quotient.inductionOn x ?_ hx
     intro a hxa
     change Quotient.mk (Fraction.relSetoid S) (Fraction.mul ⟨p, 1, S.one_mem⟩ a) =
         Quotient.mk (Fraction.relSetoid S) Fraction.one at hxa
     have hrel : Fraction.Rel (Fraction.mul ⟨p, 1, S.one_mem⟩ a) Fraction.one := Quotient.exact hxa
-    have hdiv : dvd p a.den := by
+    have hdiv : p ∣ a.den := by
       refine ⟨a.num, ?_⟩
       calc
         a.den = 1 * (1 * a.den) := by grind
@@ -259,7 +256,8 @@ theorem localization_irreducible_of_irreducible {α : Type _} [IntegralDomain α
       apply MultSet.listProd_mem
       intro q hq
       exact (hys q hq).1
-    rcases hp.2.2 a' b' habp.symm with haunit | hbunit
+    have hmul : Irreducible (a' * b') := by simpa [habp] using hp
+    rcases of_irreducible_mul hmul with haunit | hbunit
     · left
       change IsUnit (Localization.mk (S := S) a.num a.den a.den_mem)
       rw [ha]
@@ -273,20 +271,20 @@ theorem localization_irreducible_of_irreducible {α : Type _} [IntegralDomain α
       exact isUnit_mul (localization_isUnit_mk_of_mem (S := S) hsy b.den_mem)
         (localization_isUnit_of_isUnit (S := S) hbunit)
 
-theorem localization_prime_of_prime {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem localization_prime_of_prime {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     {p : α} (hp : Prime p) (havoid : Avoids S p) : Prime (Localization.of (S := S) p) := by
   refine ⟨?_, ?_, ?_⟩
-  · change Localization.of (S := S) p ≠ (Zero.zero : Localization S)
+  · change Localization.of (S := S) p ≠ (0 : Localization S)
     intro hp0
-    exact hp.1 ((localization_of_eq_zero_iff (S := S) p).mp hp0)
+    exact hp.ne_zero ((localization_of_eq_zero_iff (S := S) p).mp hp0)
   · intro hunit
-    rcases hunit with ⟨x, hx⟩
+    rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
     refine Quotient.inductionOn x ?_ hx
     intro a hxa
     change Quotient.mk (Fraction.relSetoid S) (Fraction.mul ⟨p, 1, S.one_mem⟩ a) =
         Quotient.mk (Fraction.relSetoid S) Fraction.one at hxa
     have hrel : Fraction.Rel (Fraction.mul ⟨p, 1, S.one_mem⟩ a) Fraction.one := Quotient.exact hxa
-    have hdiv : dvd p a.den := by
+    have hdiv : p ∣ a.den := by
       refine ⟨a.num, ?_⟩
       have h0 : p * a.num = a.den := by
         have h1 : p * a.num * 1 = 1 * (1 * a.den) := by
@@ -302,11 +300,11 @@ theorem localization_prime_of_prime {α : Type _} [IntegralDomain α] {S : MultS
         Quotient.mk (Fraction.relSetoid S) (Fraction.mul ⟨p, 1, S.one_mem⟩ c) at hEq
     have hrel : Fraction.Rel (Fraction.mul a b) (Fraction.mul ⟨p, 1, S.one_mem⟩ c) :=
       Quotient.exact hEq
-    have hdivabc : dvd p ((a.num * b.num) * c.den) := by
+    have hdivabc : p ∣ (a.num * b.num) * c.den := by
       refine ⟨c.num * (a.den * b.den), ?_⟩
       unfold Fraction.Rel Fraction.mul at hrel
       grind
-    have hdivab : dvd p (a.num * b.num) := by
+    have hdivab : p ∣ a.num * b.num := by
       rcases hp.2.2 (a.num * b.num) c.den hdivabc with hab | hc
       · exact hab
       · exact False.elim (havoid c.den c.den_mem hc)
@@ -326,9 +324,9 @@ theorem localization_prime_of_prime {α : Type _} [IntegralDomain α] {S : MultS
       unfold Fraction.Rel Fraction.mul
       grind
 
-theorem dvd_of_localization_dvd {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem dvd_of_localization_dvd {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     (hS : MultSet.GeneratedByPrimes S) {p a : α} (hp : Irreducible p) (havoid : Avoids S p)
-    (hdiv : dvd (Localization.of (S := S) p) (Localization.of (S := S) a)) : dvd p a := by
+    (hdiv : Localization.of (S := S) p ∣ Localization.of (S := S) a) : p ∣ a := by
   rcases (Localization.dvd_of_iff (S := S) (a := p) (b := a)).1 hdiv with ⟨s, hs, hsa⟩
   rcases hsa with ⟨c, hc⟩
   rcases generatedByPrimes_to_list hS hs with ⟨qs, hqs, hprime⟩
@@ -341,12 +339,12 @@ theorem dvd_of_localization_dvd {α : Type _} [IntegralDomain α] {S : MultSet �
     (fun q hq => havoid q ((hprime q hq).1))
     (fun q hq => (hprime q hq).2) heq
 
-theorem prime_of_localization_prime {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem prime_of_localization_prime {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     (hS : MultSet.GeneratedByPrimes S) {p : α} (hp : Irreducible p) (havoid : Avoids S p)
     (hploc : Prime (Localization.of (S := S) p)) : Prime p := by
-  refine ⟨hp.1, hp.2.1, ?_⟩
+  refine ⟨hp.ne_zero, hp.not_isUnit, ?_⟩
   intro a b hdiv
-  have hlocdiv : dvd (Localization.of (S := S) p)
+  have hlocdiv : Localization.of (S := S) p ∣
       (Localization.of (S := S) a * Localization.of (S := S) b) := by
     rcases hdiv with ⟨c, hc⟩
     refine ⟨Localization.of (S := S) c, ?_⟩
@@ -357,10 +355,10 @@ theorem prime_of_localization_prime {α : Type _} [IntegralDomain α] {S : MultS
   · right
     exact dvd_of_localization_dvd hS hp havoid hpb
 
-theorem nagata_key_lemma {α : Type _} [IntegralDomain α] {S : MultSet α}
+theorem nagata_key_lemma {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
     (hS : MultSet.GeneratedByPrimes S) (hUFD : UFD (α := Localization S))
     {p : α} (hp : Irreducible p) : Prime p := by
-  by_cases hmem : ∃ s : α, S s ∧ dvd p s
+  by_cases hmem : ∃ s : α, S s ∧ p ∣ s
   · rcases hmem with ⟨s, hs, hdiv⟩
     exact prime_of_irreducible_of_dvd_generated_primes hS hp hs hdiv
   · have havoid : Avoids S p := by
@@ -368,7 +366,7 @@ theorem nagata_key_lemma {α : Type _} [IntegralDomain α] {S : MultSet α}
       exact hmem ⟨s, hs, hdiv⟩
     have hlocIrred : Irreducible (Localization.of (S := S) p) :=
       localization_irreducible_of_irreducible hS hp havoid
-    have hlocPrime : Prime (Localization.of (S := S) p) := hUFD.2 _ hlocIrred
+    have hlocPrime : Prime (Localization.of (S := S) p) := UFD.prime_of_irreducible hUFD hlocIrred
     exact prime_of_localization_prime hS hp havoid hlocPrime
 
 end NagataFactoriality

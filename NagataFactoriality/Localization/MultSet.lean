@@ -2,7 +2,7 @@ import NagataFactoriality.Basic.Divisibility
 
 namespace NagataFactoriality
 
-structure MultSet (α : Type _) [IntegralDomain α] where
+structure MultSet (α : Type _) [CommRing α] [IsDomain α] where
   carrier : α → Prop
   one_mem : carrier 1
   mul_mem : ∀ {a b : α}, carrier a → carrier b → carrier (a * b)
@@ -10,7 +10,7 @@ structure MultSet (α : Type _) [IntegralDomain α] where
 
 namespace MultSet
 
-variable {α : Type _} [IntegralDomain α]
+variable {α : Type _} [CommRing α] [IsDomain α]
 
 instance : CoeFun (MultSet α) (fun _ => α → Prop) := ⟨MultSet.carrier⟩
 

@@ -1,12 +1,10 @@
 import NagataFactoriality.Localization.Localization
 
-open Lean.Grind
-
 namespace NagataFactoriality
 
 namespace Localization
 
-variable {α : Type _} [IntegralDomain α] {S : MultSet α}
+variable {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
 
 def φ : RingHom α (Localization S) where
   toFun := of (S := S)
@@ -81,7 +79,7 @@ theorem mk_eq_zero_iff {a s : α} (hs : S s) :
 
 theorem isUnit_mk_of_mem {a s : α} (ha : S a) (hs : S s) :
     IsUnit (mk (S := S) a s hs) := by
-  refine ⟨mk (S := S) s a ha, ?_⟩
+  refine isUnit_iff_exists_inv.mpr ⟨mk (S := S) s a ha, ?_⟩
   change mk (S := S) (a * s) (s * a) (S.mul_mem hs ha) = 1
   change mk (S := S) (a * s) (s * a) (S.mul_mem hs ha) = mk (S := S) 1 1 S.one_mem
   exact (mk_eq_iff (S := S) (hs := S.mul_mem hs ha) (ht := S.one_mem)).2 (by
@@ -91,8 +89,8 @@ theorem isUnit_of_mem {s : α} (hs : S s) : IsUnit (of (S := S) s) := by
   simpa [of] using isUnit_mk_of_mem (S := S) (a := s) (s := 1) hs S.one_mem
 
 theorem isUnit_of_isUnit {a : α} (ha : IsUnit a) : IsUnit (of (S := S) a) := by
-  rcases ha with ⟨b, hb⟩
-  refine ⟨of (S := S) b, ?_⟩
+  rcases isUnit_iff_exists_inv.mp ha with ⟨b, hb⟩
+  refine isUnit_iff_exists_inv.mpr ⟨of (S := S) b, ?_⟩
   calc
     of (S := S) a * of (S := S) b = of (S := S) (a * b) := by
       symm
@@ -100,7 +98,7 @@ theorem isUnit_of_isUnit {a : α} (ha : IsUnit a) : IsUnit (of (S := S) a) := by
     _ = (One.one : Localization S) := by rw [hb, of_one]
 
 theorem dvd_φ_iff {a b : α} :
-    dvd (φ (S := S) a) (φ (S := S) b) ↔ ∃ s : α, S s ∧ dvd a (s * b) := by
+    φ (S := S) a ∣ φ (S := S) b ↔ ∃ s : α, S s ∧ a ∣ s * b := by
   constructor
   · rintro ⟨x, hx⟩
     refine Quotient.inductionOn x ?_ hx
@@ -123,7 +121,7 @@ theorem dvd_φ_iff {a b : α} :
       grind)
 
 theorem dvd_of_iff {a b : α} :
-    dvd (of (S := S) a) (of (S := S) b) ↔ ∃ s : α, S s ∧ dvd a (s * b) := by
+    of (S := S) a ∣ of (S := S) b ↔ ∃ s : α, S s ∧ a ∣ s * b := by
   simpa using (dvd_φ_iff (S := S) (a := a) (b := b))
 
 end Localization
