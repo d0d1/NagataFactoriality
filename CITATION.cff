@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the software metadata below."
+title: "NagataFactoriality"
+type: software
+license: Apache-2.0
+authors:
+  - family-names: Ramos
+    given-names: Arthur Freitas
+    email: arfreita@microsoft.com
+repository-code: "https://github.com/Arthur742Ramos/NagataFactoriality"
+abstract: >-
+  A Lean 4 / Mathlib formalization project centered on Nagata's factoriality
+  theorem, localization, and unique factorization.

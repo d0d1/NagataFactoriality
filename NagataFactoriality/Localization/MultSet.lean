@@ -13,6 +13,7 @@ theorem zero_notMem_of_prime_or_unit {S : Submonoid α}
   · exact h0prime.ne_zero rfl
   · exact h0unit.ne_zero rfl
 
+omit [IsDomain α] in
 theorem mem_ne_zero {S : Submonoid α} [Fact ((0 : α) ∉ S)] {s : α} (hs : s ∈ S) : s ≠ 0 := by
   intro hs0
   have h0 : (0 : α) ∈ S := by simpa [hs0] using hs

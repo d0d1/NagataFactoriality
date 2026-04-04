@@ -7,7 +7,7 @@ abbrev Localization {α : Type*} [CommRing α] (S : Submonoid α) := _root_.Loca
 
 namespace Localization
 
-variable {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+variable {α : Type*} [CommRing α] {S : Submonoid α}
 
 def mk (a s : α) (hs : s ∈ S) : Localization S :=
   _root_.Localization.mk a ⟨s, hs⟩
@@ -33,29 +33,30 @@ def of (a : α) : Localization S :=
 @[simp] theorem of_neg (a : α) : of (S := S) (-a) = -of (S := S) a := by
   simp [of]
 
+@[simp] theorem mk_mul_den (a s : α) (hs : s ∈ S) :
+    mk (S := S) a s hs * of (S := S) s = of (S := S) a := by
+  rw [mk, of, _root_.Localization.mk_eq_mk'_apply]
+  exact IsLocalization.mk'_spec_mk (M := S) (S := Localization S) a s hs
+
+@[simp] theorem den_mul_mk (a s : α) (hs : s ∈ S) :
+    of (S := S) s * mk (S := S) a s hs = of (S := S) a := by
+  rw [mul_comm]
+  exact mk_mul_den (S := S) a s hs
+
+theorem surj (z : Localization S) : ∃ a s, ∃ hs : s ∈ S, z = mk (S := S) a s hs := by
+  obtain ⟨a, s, hs⟩ := IsLocalization.mk'_surjective (M := S) (S := Localization S) z
+  exact ⟨a, s, s.property, by
+    simpa [mk, _root_.Localization.mk_eq_mk'_apply] using hs.symm⟩
+
 section Nonzero
 
-variable [Fact ((0 : α) ∉ S)]
+variable [IsDomain α] [Fact ((0 : α) ∉ S)]
 
 instance : IsDomain (Localization S) :=
   IsLocalization.isDomain_localization (M := S) (Submonoid.le_nonZeroDivisors (S := S))
 
 theorem algebraMap_injective : Function.Injective (algebraMap α (Localization S)) :=
   IsLocalization.injective (M := S) (S := Localization S) (Submonoid.le_nonZeroDivisors (S := S))
-
-@[simp] theorem mk_mul_den (a s : α) (hs : s ∈ S) :
-    mk (S := S) a s hs * of (S := S) s = of (S := S) a := by
-  simpa [mk, of, _root_.Localization.mk_eq_mk'_apply] using
-    (IsLocalization.mk'_spec_mk (M := S) (S := Localization S) a s hs)
-
-@[simp] theorem den_mul_mk (a s : α) (hs : s ∈ S) :
-    of (S := S) s * mk (S := S) a s hs = of (S := S) a := by
-  simpa [mul_comm] using mk_mul_den (S := S) a s hs
-
-theorem surj (z : Localization S) : ∃ a s, ∃ hs : s ∈ S, z = mk (S := S) a s hs := by
-  obtain ⟨a, s, hs⟩ := IsLocalization.mk'_surjective (M := S) (S := Localization S) z
-  exact ⟨a, s, s.property, by
-    simpa [mk, _root_.Localization.mk_eq_mk'_apply] using hs.symm⟩
 
 theorem mk_eq_iff {a b s t : α} (hs : s ∈ S) (ht : t ∈ S) :
     mk (S := S) a s hs = mk (S := S) b t ht ↔ a * t = b * s := by
@@ -89,6 +90,8 @@ theorem mk_eq_zero_iff {a s : α} (hs : s ∈ S) : mk (S := S) a s hs = 0 ↔ a 
   show algebraMap α (Localization S) a = 0 ↔ a = 0
   exact IsLocalization.to_map_eq_zero_iff (M := S) (S := Localization S) (x := a)
     (Submonoid.le_nonZeroDivisors (S := S))
+
+end Nonzero
 
 @[simp] theorem mk_mul_mk {a b s t : α} (hs : s ∈ S) (ht : t ∈ S) :
     mk (S := S) a s hs * mk (S := S) b t ht =
@@ -125,9 +128,16 @@ theorem isUnit_of_isUnit {a : α} (ha : IsUnit a) : IsUnit (of (S := S) a) :=
 theorem isUnit_mk_of_isUnit {a s : α} (ha : IsUnit a) (hs : s ∈ S) :
     IsUnit (mk (S := S) a s hs) := by
   have hmk : mk (S := S) a s hs = of (S := S) a * mk (S := S) 1 s hs := by
-    simpa using (of_mul_mk (S := S) a 1 s hs).symm
+    calc
+      mk (S := S) a s hs = mk (S := S) (a * 1) s hs := by simp
+      _ = of (S := S) a * mk (S := S) 1 s hs := by
+        rw [← of_mul_mk (S := S) a 1 s hs]
   rw [hmk]
   exact isUnit_mul (isUnit_of_isUnit (S := S) ha) (isUnit_mk_of_mem (S := S) S.one_mem hs)
+
+section Nonzero
+
+variable [IsDomain α] [Fact ((0 : α) ∉ S)]
 
 theorem dvd_of_iff {a b : α} :
     of (S := S) a ∣ of (S := S) b ↔ ∃ s : α, s ∈ S ∧ a ∣ s * b := by

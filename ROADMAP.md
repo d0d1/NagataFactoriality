@@ -1,130 +1,97 @@
-# Roadmap to Publication-Ready Formalization
+# Roadmap to Publication
 
-## Current State
-- Nagata's Factoriality Theorem proved with zero sorry (1,600 lines)
-- Custom algebra framework (not Mathlib)
-- Codex audit: real proof, mathematically sound, ecosystem-isolated
+## Current assessment
 
----
+### What is already good
 
-## Phase 1: Mathlib Migration (BLOCKER — needs disk space)
+- The repository is Mathlib-based on Lean 4.24.0.
+- The development contains nontrivial localization and divisibility machinery.
+- There are no `sorry`, `admit`, or `axiom` placeholders in the checked Lean sources.
+- `NagataFactoriality\Nagata\Theorem.lean` now states and proves a prime-generated Nagata-style theorem.
+- `NagataFactoriality\Applications\Laurent.lean` now contains a theorem-driven localization application.
+- CI, citation metadata, a cleaned warning-free core build, and a successful full `lake build` are already in place.
+- `paper\main.tex` now contains a manuscript draft with cited related work, proof architecture, upstreaming scope, and release-packaging notes.
 
-**Goal:** Replace all custom definitions with Mathlib types.
+### What blocks publication
 
-### 1.1 Infrastructure
-- [ ] Free disk space on dev machine OR use Azure VM / cloud machine
-- [ ] Add `require mathlib` to lakefile.lean (done, untested)
-- [ ] Run `lake update && lake exe cache get` successfully
-- [ ] Verify Mathlib builds
-
-### 1.2 Type Bridges (in order)
-Each step: replace custom def → use Mathlib's → fix downstream proofs.
-
-| Custom | Mathlib | Difficulty |
-|--------|---------|------------|
-| `IntegralDomain` | `[CommRing R] [IsDomain R]` | Easy |
-| `dvd` | `Dvd.dvd` (∣) | Easy (exact match) |
-| `IsUnit` | `IsUnit` (bundled units) | Easy |
-| `Associated` | `Associated` (bundled) | Easy |
-| `Irreducible` | `Irreducible` (drop `p ≠ 0`) | Easy |
-| `Prime` | `Prime` | Easy |
-| `Ideal` | `Ideal R` (= `Submodule R R`) | Medium |
-| `NoetherianRing` | `IsNoetherianRing R` | Medium |
-| `MultSet` | `Submonoid R` + `0 ∉ S` | Medium |
-| `Localization` | `Localization S` + `IsLocalization` | Hard |
-| `HasFactorization` | `WfDvdMonoid` + `exists_factors` | Hard |
-| `UFD` | `UniqueFactorizationMonoid` | Hard |
-| `RingHom` | `RingHom` (Mathlib's) | Easy |
-
-### 1.3 Main Theorem Restatement
-- [ ] Restate `nagata_theorem` using only Mathlib types:
-```lean
-theorem nagata_theorem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
-    (S : Submonoid R) (hS : ∀ s ∈ S, Prime s ∨ IsUnit s)
-    (hUFD : UniqueFactorizationMonoid (Localization S)) :
-    UniqueFactorizationMonoid R
-```
-- [ ] Verify the proof still goes through with Mathlib API
+1. **Submission blocker:** the repository-level work is now largely complete, but the manuscript will still need venue-specific prose and bibliography polish.
+2. **Artifact blocker:** the paper should ultimately cite a tagged release rather than a moving branch, so a final submission artifact cut remains to be executed.
+3. **Scope blocker:** the Mathlib-upstreamable subset is now identified at a high level, but still needs final packaging decisions if upstreaming is pursued.
 
 ---
 
-## Phase 2: Uniqueness of Factorization
+## Phase 1: Repair the theorem
 
-**Goal:** Prove the "U" in UFD actually works.
+**Goal:** formalize a genuine Nagata-style statement.
 
-- [ ] Define factorization equivalence (same irreducibles up to `Associated` and permutation)
-- [ ] Prove: if irreducible = prime, then factorizations are unique up to associates and reordering
-- [ ] Connect to Mathlib's `UniqueFactorizationMonoid.factors` and `Multiset.Rel Associated`
-- [ ] Prove `factors_unique` theorem
+- [x] Introduce a prime-generated submonoid hypothesis.
+- [x] Prove helper lemmas showing that an irreducible dividing an element of a prime-generated submonoid is prime.
+- [x] Refactor the localization lemmas to work with prime-generated denominators instead of a prime-or-unit denominator.
+- [x] Replace the current main theorem with the corrected statement.
 
----
-
-## Phase 3: Applications and Corollaries
-
-**Goal:** Show the theorem is useful.
-
-### 3.1 Gauss's Lemma
-- [ ] Define polynomial ring `R[X]` (or use Mathlib's `Polynomial R`)
-- [ ] Prove content of a polynomial
-- [ ] Prove Gauss's lemma: product of primitive polynomials is primitive
-- [ ] Corollary: `R` UFD → `R[X]` UFD (classic application of Nagata)
-
-### 3.2 Laurent Polynomials
-- [ ] `R` UFD → `R[X, X⁻¹]` UFD (as localization of `R[X]` at `{Xⁿ}`)
-
-### 3.3 Concrete Examples
-- [ ] `ℤ` is a UFD (trivial but good test)
-- [ ] `ℤ[X]` is a UFD (via Nagata + ℤ is Noetherian + ℚ[X] is a PID)
-- [ ] `k[X₁, ..., Xₙ]` is a UFD (iterated application)
+**Success condition:** `NagataFactoriality\Nagata\Theorem.lean` states and proves a nondegenerate version of Nagata's theorem.
 
 ---
 
-## Phase 4: Documentation and Paper
+## Phase 2: Add a theorem-driven application
 
-**Goal:** Write a publishable paper.
+**Goal:** show that the corrected theorem does real work.
 
-### 4.1 Paper Structure
-- [ ] Introduction: why Nagata's theorem, why formalize it
-- [ ] Related work: existing Lean/Coq/Isabelle formalizations of UFD theory
-- [ ] Proof outline: how the formalization is structured
-- [ ] Design decisions: why this proof strategy, comparison with alternatives
-- [ ] Lessons learned: what was easy/hard to formalize
-- [ ] Statistics: LOC, theorem count, build time
+- [x] Add an application that genuinely depends on the corrected Nagata theorem.
+- [x] Keep thin wrappers around existing Mathlib instances clearly marked as background/examples rather than core contributions.
 
-### 4.2 Comparison with Existing Work
-- [ ] Check if Mathlib already has Nagata's theorem (it may!)
-- [ ] If yes: what does our approach contribute? (Different proof? Better API?)
-- [ ] If no: this is a genuine contribution to Mathlib
-- [ ] Check Isabelle AFP, Coq stdlib/MathComp for prior art
+**Candidates:**
 
-### 4.3 Mathlib PR
-- [ ] If Nagata's theorem is NOT in Mathlib: prepare a Mathlib PR
-- [ ] Follow Mathlib contribution guidelines (style, naming, module structure)
-- [ ] Get review from Mathlib maintainers
+- Laurent polynomial UFD results phrased explicitly as localization applications
+- A polynomial-ring corollary packaged around the corrected Nagata theorem
 
 ---
 
-## Phase 5: Extensions (Optional, Post-Publication)
+## Phase 3: Establish novelty and contribution
 
-- [ ] Nagata's theorem for non-Noetherian rings (Gilmer's generalization)
-- [ ] Krull's theorem: Noetherian domain is UFD iff every height-1 prime is principal
-- [ ] Connection to class groups: R is UFD iff Cl(R) = 0
-- [ ] Dedekind domains and unique factorization of ideals
+**Goal:** know exactly what the paper is claiming.
+
+- [x] Check whether Mathlib already contains Nagata's theorem or an equivalent result.
+- [x] Check prior formalizations in Lean, Coq, Isabelle, and related libraries.
+- [x] Write a one-paragraph contribution statement explaining what is genuinely new here.
+- [x] Turn the current audit into a citation-grade related-work section.
+
+**Status so far:** the manuscript now records a citation-backed nearby-work discussion and a cautious novelty claim: no obvious public formalization of Nagata's factoriality theorem has been identified, but the claim is framed explicitly as a current public-state assessment rather than an impossibility result.
+
+**Success condition:** the project has a clear answer to “why should this be published?”
 
 ---
 
-## Priority Order
+## Phase 4: Make the repo publication-grade
 
-1. **Phase 1** (Mathlib migration) — everything depends on this
-2. **Phase 2** (uniqueness) — mathematical completeness
-3. **Phase 4.2** (check existing work) — do this EARLY to avoid duplicating
-4. **Phase 3.1** (Gauss's lemma) — strongest corollary
-5. **Phase 4** (paper) — write up results
-6. **Phase 5** (extensions) — if time permits
+**Goal:** make the formalization easy to build, inspect, and cite.
 
-## Estimated Effort
-- Phase 1: 2-3 days (mostly fighting Mathlib API)
-- Phase 2: 1 day
-- Phase 3: 2-3 days
-- Phase 4: 3-5 days (writing)
-- Total: ~2 weeks to publication-ready
+- [x] Add GitHub Actions CI for `lake build`.
+- [x] Add citation metadata.
+- [x] Record reproducible setup instructions.
+- [x] Add basic project statistics needed in the paper.
+
+---
+
+## Phase 5: Write the paper
+
+**Goal:** produce the submission-ready narrative around the formalization.
+
+- [x] Abstract
+- [x] Manuscript draft in `paper\main.tex`
+- [x] Introduction and motivation (draft)
+- [x] Related work (citation-grade)
+- [x] Formal proof architecture (draft)
+- [x] Main theorem and application summary
+- [x] Upstreamable-scope note
+- [x] Release-packaging note
+- [x] Limitations and future work
+
+---
+
+## Immediate next steps
+
+1. Cut and cite a tagged submission artifact when the paper is submitted.
+2. Adapt the manuscript prose and bibliography to the target venue's style.
+3. Decide whether to split the upstreamable localization API into a separate Mathlib-facing contribution.
+4. Expand the application section if the eventual venue prefers a stronger experimental or case-study component.

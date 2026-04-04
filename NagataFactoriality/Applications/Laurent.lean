@@ -2,6 +2,8 @@ import Mathlib.Algebra.Polynomial.Laurent
 import Mathlib.Algebra.Polynomial.RingDivision
 import Mathlib.RingTheory.Localization.Ideal
 import Mathlib.RingTheory.Polynomial.UniqueFactorization
+import NagataFactoriality.Nagata.Lemmas
+import NagataFactoriality.Nagata.Theorem
 
 namespace NagataFactoriality
 
@@ -13,8 +15,8 @@ theorem laurentPolynomial_isLocalization (R : Type*) [CommSemiring R] :
   LaurentPolynomial.isLocalization
 
 theorem polynomial_prime_X {R : Type*} [CommRing R] [IsDomain R] :
-    Prime (Polynomial.X : (Polynomial R)[X]) :=
-  (Polynomial.prime_X : Prime (Polynomial.X : (Polynomial R)[X]))
+    Prime (Polynomial.X : R[X]) :=
+  (Polynomial.prime_X : Prime (Polynomial.X : R[X]))
 
 theorem polynomial_toLaurent_prime_of_not_dvd_X {R : Type*} [CommRing R] [IsDomain R]
     {p : R[X]} (hp : Prime p) (hX : ¬ p ∣ X) : Prime (Polynomial.toLaurent p) := by
@@ -81,5 +83,25 @@ theorem laurentPolynomial_uniqueFactorizationMonoid {R : Type*} [CommRing R] [Is
         (associated_mul_unit_left (Polynomial.toLaurent q) (LaurentPolynomial.T (p.rootMultiplicity 0))
           (LaurentPolynomial.isUnit_T (p.rootMultiplicity 0)))
     exact hmapassoc.trans (hfp.trans hpqAssoc).symm
+
+theorem polynomial_uniqueFactorizationMonoid_of_laurent {R : Type*} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] [UniqueFactorizationMonoid R[T;T⁻¹]] :
+    UniqueFactorizationMonoid R[X] := by
+  let S : Submonoid R[X] := Submonoid.powers X
+  have hS : PrimeGenerated S := by
+    simpa [S] using (primeGenerated_powers (p := (X : R[X])) (polynomial_prime_X (R := R)))
+  letI : Fact ((0 : R[X]) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
+  letI : IsLocalization.Away (X : R[X]) R[T;T⁻¹] := laurentPolynomial_isLocalization R
+  let e : R[T;T⁻¹] ≃* Localization S :=
+    (IsLocalization.algEquiv S (Localization S) R[T;T⁻¹]).toRingEquiv.toMulEquiv.symm
+  have hUFDLoc : UniqueFactorizationMonoid (Localization S) := by
+    exact MulEquiv.uniqueFactorizationMonoid e
+      (inferInstance : UniqueFactorizationMonoid R[T;T⁻¹])
+  exact nagata_theorem (R := R[X]) S hS hUFDLoc
+
+theorem polynomial_uniqueFactorizationMonoid_via_nagata {R : Type*} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] [UniqueFactorizationMonoid R] : UniqueFactorizationMonoid R[X] := by
+  letI : UniqueFactorizationMonoid R[T;T⁻¹] := laurentPolynomial_uniqueFactorizationMonoid (R := R)
+  exact polynomial_uniqueFactorizationMonoid_of_laurent (R := R)
 
 end NagataFactoriality
