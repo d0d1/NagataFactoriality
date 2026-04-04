@@ -4,11 +4,11 @@ import NagataFactoriality.Basic.Divisibility
 namespace NagataFactoriality
 
 theorem hasFactorization_of_noetherian {α : Type*} [CommRing α] [IsDomain α]
-    [IsNoetherianRing α] : HasFactorization (α := α) := by
-  exact (show WfDvdMonoid α from inferInstance)
+    [IsNoetherianRing α] : WfDvdMonoid α := by
+  infer_instance
 
 theorem IsNoetherianRing.hasFactorization {α : Type*} [CommRing α] [IsDomain α]
-    (h : IsNoetherianRing α) : HasFactorization (α := α) := by
+    (h : IsNoetherianRing α) : WfDvdMonoid α := by
   letI := h
   exact hasFactorization_of_noetherian (α := α)
 

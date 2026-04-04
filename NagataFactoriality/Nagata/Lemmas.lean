@@ -3,370 +3,167 @@ import NagataFactoriality.Basic.UFD
 
 namespace NagataFactoriality
 
-theorem ufd_irreducible_iff_prime {α : Type _} [CommRing α] [IsDomain α]
-    (h : UFD (α := α)) {p : α} : Irreducible p ↔ Prime p := by
-  exact (prime_iff_irreducible_of_ufd h (p := p)).symm
+def Avoids {α : Type*} [CommRing α] [IsDomain α] (S : Submonoid α) (p : α) : Prop :=
+  ∀ s : α, s ∈ S → ¬ p ∣ s
 
-def Avoids {α : Type _} [CommRing α] [IsDomain α] (S : MultSet α) (p : α) : Prop :=
-  ∀ s : α, S s → ¬ p ∣ s
+private def submonoidZeroNotMemFact {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) : Fact ((0 : α) ∉ S) :=
+  ⟨Submonoid.zero_notMem_of_prime_or_unit hS⟩
 
-theorem localization_of_eq_zero_iff {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α} (a : α) :
-    Localization.of (S := S) a = (Zero.zero : Localization S) ↔ a = 0 := by
-  constructor
-  · intro h
-    exact (Localization.of_eq_iff (S := S) a 0).mp (by simpa [Localization.of_zero (S := S)] using h)
-  · intro h
-    subst h
-    exact Localization.of_zero (S := S)
+theorem prime_of_irreducible_of_dvd_mem {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p s : α}
+    (hp : Irreducible p) (hs : s ∈ S) (hdiv : p ∣ s) : Prime p := by
+  rcases hS s hs with hsPrime | hsUnit
+  · have hsIrred : Irreducible s := prime_irreducible hsPrime
+    have hassoc : Associated p s := associated_of_irreducible_of_dvd hp hsIrred hdiv
+    exact prime_of_associated hsPrime (associated_symm hassoc)
+  · exact False.elim (hp.not_isUnit (isUnit_of_dvd_unit hdiv hsUnit))
 
-theorem localization_mk_mul_of {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    (a b s : α) (hs : S s) :
-    Localization.mk (S := S) (a * b) s hs =
-      Localization.mk (S := S) a s hs * Localization.of (S := S) b := by
-  exact Localization.mk_mul_of (S := S) a b s hs
-
-theorem localization_isUnit_of_mem {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    {s : α} (hs : S s) : IsUnit (Localization.of (S := S) s) := by
-  exact Localization.isUnit_of_mem (S := S) hs
-
-theorem localization_isUnit_mk_of_mem {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    {a s : α} (ha : S a) (hs : S s) : IsUnit (Localization.mk (S := S) a s hs) := by
-  exact Localization.isUnit_mk_of_mem (S := S) ha hs
-
-theorem localization_isUnit_of_isUnit {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    {a : α} (ha : IsUnit a) : IsUnit (Localization.of (S := S) a) := by
-  exact Localization.isUnit_of_isUnit (S := S) ha
-
-theorem generatedByPrimes_to_list {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    (hS : MultSet.GeneratedByPrimes S) {s : α} (hs : S s) :
-    ∃ qs : List α, listProd qs = s ∧ ∀ q : α, q ∈ qs → S q ∧ Prime q := by
-  exact MultSet.generatedBy_to_list (hS s hs)
-
-theorem prime_of_irreducible_of_dvd_listProd_primes {α : Type _} [CommRing α] [IsDomain α]
-    {qs : List α} {p : α} (hp : Irreducible p)
-    (hqs : ∀ q : α, q ∈ qs → Prime q) (hdiv : p ∣ listProd qs) : Prime p := by
-  induction qs generalizing p with
-  | nil =>
-      exfalso
-      exact hp.not_isUnit (isUnit_of_dvd_one (by simpa using hdiv))
-  | cons q qs ih =>
-      have hq : Prime q := hqs q (by simp)
-      rcases hdiv with ⟨c, hc⟩
-      have hqdiv : q ∣ p * c := by
-        refine ⟨listProd qs, ?_⟩
-        simpa [listProd] using hc.symm
-      rcases hq.2.2 p c hqdiv with hqp | hqc
-      · have hqirr : Irreducible q := prime_irreducible hq
-        have hassoc : Associated q p := associated_of_irreducible_of_dvd hqirr hp hqp
-        exact prime_of_associated hq hassoc
-      · rcases hqc with ⟨d, hd⟩
-        have q0 : q ≠ 0 := hq.1
-        have hrest : p ∣ listProd qs := by
-          refine ⟨d, ?_⟩
-          have hcancel : q * listProd qs = q * (p * d) := by
-            calc
-              q * listProd qs = p * c := by simpa [listProd] using hc
-              _ = p * (q * d) := by rw [hd]
-              _ = q * (p * d) := by grind
-          exact mul_left_cancel₀ q0 hcancel
-        apply ih hp
-        · intro r hr
-          exact hqs r (by simp [hr])
-        · exact hrest
-
-theorem prime_of_irreducible_of_dvd_generated_primes {α : Type _} [CommRing α] [IsDomain α]
-    {S : MultSet α} (hS : MultSet.GeneratedByPrimes S) {p s : α}
-    (hp : Irreducible p) (hs : S s) (hdiv : p ∣ s) : Prime p := by
-  rcases generatedByPrimes_to_list hS hs with ⟨qs, hqs, hprime⟩
-  apply prime_of_irreducible_of_dvd_listProd_primes hp
-  · intro q hq
-    exact (hprime q hq).2
-  · simpa [hqs] using hdiv
-
-theorem dvd_of_mul_listProd_eq {α : Type _} [CommRing α] [IsDomain α] {qs : List α} {a c p : α}
-    (hp : Irreducible p) (havoid : ∀ q : α, q ∈ qs → ¬ p ∣ q)
-    (hqs : ∀ q : α, q ∈ qs → Prime q) (h : a * listProd qs = p * c) : p ∣ a := by
-  induction qs generalizing a c with
-  | nil =>
-      refine ⟨c, ?_⟩
-      have h' : a = p * c := by
-        grind [listProd]
-      exact h'
-  | cons q qs ih =>
-      have hq : Prime q := hqs q (by simp)
-      have hqdiv : q ∣ p * c := by
-        refine ⟨a * listProd qs, ?_⟩
-        calc
-          p * c = a * listProd (q :: qs) := h.symm
-          _ = q * (a * listProd qs) := by simp [listProd]; grind
-      rcases hq.2.2 p c hqdiv with hqp | hqc
-      · exfalso
-        have hqirr : Irreducible q := prime_irreducible hq
-        have hassoc : Associated q p := associated_of_irreducible_of_dvd hqirr hp hqp
-        exact havoid q (by simp) (dvd_of_associated (associated_symm hassoc))
-      · rcases hqc with ⟨d, hd⟩
-        have q0 : q ≠ 0 := hq.1
-        have hrest : a * listProd qs = p * d := by
-          have hcancel : q * (a * listProd qs) = q * (p * d) := by
-            calc
-              q * (a * listProd qs) = a * (q * listProd qs) := by grind
-              _ = a * listProd (q :: qs) := by simp [listProd]
-              _ = p * c := h
-              _ = p * (q * d) := by rw [hd]
-              _ = q * (p * d) := by grind
-          exact mul_left_cancel₀ q0 hcancel
-        apply ih
-        · intro r hr
-          exact havoid r (by simp [hr])
-        · intro r hr
-          exact hqs r (by simp [hr])
-        · exact hrest
-
-theorem split_listProd_primes_across_product {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    {qs : List α} {a b p : α}
-    (hqs : ∀ q : α, q ∈ qs → S q ∧ Prime q) (h : a * b = p * listProd qs) :
-    ∃ xs ys : List α, ∃ a' b' : α,
-      (∀ q : α, q ∈ xs → S q ∧ Prime q) ∧
-      (∀ q : α, q ∈ ys → S q ∧ Prime q) ∧
-      listProd qs = listProd xs * listProd ys ∧
-      a = listProd xs * a' ∧
-      b = listProd ys * b' ∧
-      a' * b' = p := by
-  induction qs generalizing a b p with
-  | nil =>
-      have hab : a * b = p := by
-        grind [listProd]
-      refine ⟨[], [], a, b, ?_, ?_, ?_, ?_, ?_, hab⟩
-      · intro q hq
-        simp at hq
-      · intro q hq
-        simp at hq
-      · grind [listProd]
-      · grind [listProd]
-      · grind [listProd]
-  | cons q qs ih =>
-      have hqSq : S q := (hqs q (by simp)).1
-      have hqPrime : Prime q := (hqs q (by simp)).2
-      have hqdiv : q ∣ a * b := by
-        refine ⟨p * listProd qs, ?_⟩
-        calc
-          a * b = p * listProd (q :: qs) := h
-          _ = p * (q * listProd qs) := by simp [listProd]
-          _ = q * (p * listProd qs) := by grind
-      rcases hqPrime.2.2 a b hqdiv with hqa | hqb
-      · rcases hqa with ⟨d, hd⟩
-        have q0 : q ≠ 0 := hqPrime.1
-        have hrest : d * b = p * listProd qs := by
-          have hcancel : q * (d * b) = q * (p * listProd qs) := by
-            calc
-              q * (d * b) = a * b := by rw [hd]; grind
-              _ = p * listProd (q :: qs) := h
-              _ = p * (q * listProd qs) := by simp [listProd]
-              _ = q * (p * listProd qs) := by grind
-          exact mul_left_cancel₀ q0 hcancel
-        rcases ih (a := d) (b := b) (p := p)
-            (fun r hr => hqs r (by simp [hr])) hrest with
-          ⟨xs, ys, a', b', hxs, hys, hprod, ha, hb, hab⟩
-        refine ⟨q :: xs, ys, a', b', ?_, hys, ?_, ?_, hb, hab⟩
-        · intro r hr
-          simp at hr
-          rcases hr with rfl | hr
-          · exact ⟨hqSq, hqPrime⟩
-          · exact hxs r hr
-        · calc
-            listProd (q :: qs) = q * listProd qs := by simp [listProd]
-            _ = q * (listProd xs * listProd ys) := by rw [hprod]
-            _ = listProd (q :: xs) * listProd ys := by simp [listProd]; grind
-        · calc
-            a = q * d := hd
-            _ = q * (listProd xs * a') := by rw [ha]
-            _ = listProd (q :: xs) * a' := by simp [listProd]; grind
-      · rcases hqb with ⟨d, hd⟩
-        have q0 : q ≠ 0 := hqPrime.1
-        have hrest : a * d = p * listProd qs := by
-          have hcancel : q * (a * d) = q * (p * listProd qs) := by
-            calc
-              q * (a * d) = a * b := by rw [hd]; grind
-              _ = p * listProd (q :: qs) := h
-              _ = p * (q * listProd qs) := by simp [listProd]
-              _ = q * (p * listProd qs) := by grind
-          exact mul_left_cancel₀ q0 hcancel
-        rcases ih (a := a) (b := d) (p := p)
-            (fun r hr => hqs r (by simp [hr])) hrest with
-          ⟨xs, ys, a', b', hxs, hys, hprod, ha, hb, hab⟩
-        refine ⟨xs, q :: ys, a', b', hxs, ?_, ?_, ha, ?_, hab⟩
-        · intro r hr
-          simp at hr
-          rcases hr with rfl | hr
-          · exact ⟨hqSq, hqPrime⟩
-          · exact hys r hr
-        · calc
-            listProd (q :: qs) = q * listProd qs := by simp [listProd]
-            _ = q * (listProd xs * listProd ys) := by rw [hprod]
-            _ = listProd xs * listProd (q :: ys) := by simp [listProd]; grind
-        · calc
-            b = q * d := hd
-            _ = q * (listProd ys * b') := by rw [hb]
-            _ = listProd (q :: ys) * b' := by simp [listProd]; grind
-
-theorem localization_irreducible_of_irreducible {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    (hS : MultSet.GeneratedByPrimes S) {p : α} (hp : Irreducible p)
+theorem localization_irreducible_of_irreducible {α : Type*} [CommRing α] [IsDomain α]
+    {S : Submonoid α} (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α} (hp : Irreducible p)
     (havoid : Avoids S p) : Irreducible (Localization.of (S := S) p) := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
   refine ⟨?_, ?_⟩
   · intro hunit
-    rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
-    refine Quotient.inductionOn x ?_ hx
-    intro a hxa
-    change Quotient.mk (Fraction.relSetoid S) (Fraction.mul ⟨p, 1, S.one_mem⟩ a) =
-        Quotient.mk (Fraction.relSetoid S) Fraction.one at hxa
-    have hrel : Fraction.Rel (Fraction.mul ⟨p, 1, S.one_mem⟩ a) Fraction.one := Quotient.exact hxa
-    have hdiv : p ∣ a.den := by
-      refine ⟨a.num, ?_⟩
-      calc
-        a.den = 1 * (1 * a.den) := by grind
-        _ = (p * a.num) * 1 := by
-          simpa [Fraction.Rel, Fraction.mul, Fraction.one] using hrel.symm
-        _ = p * a.num := by grind
-    exact havoid a.den a.den_mem hdiv
+    have hdiv : Localization.of (S := S) p ∣ (1 : Localization S) := by
+      rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
+      exact ⟨x, hx.symm⟩
+    have hdiv' : Localization.of (S := S) p ∣ Localization.of (S := S) (1 : α) := by
+      simpa using hdiv
+    rcases (Localization.dvd_of_iff (S := S) (a := p) (b := 1)).1 hdiv' with ⟨s, hs, hps⟩
+    exact havoid s hs (by simpa using hps)
   · intro x y hxy
-    refine Quotient.inductionOn₂ x y ?_ hxy
-    intro a b hab
-    change Quotient.mk (Fraction.relSetoid S) ⟨p, 1, S.one_mem⟩ =
-        Quotient.mk (Fraction.relSetoid S) (Fraction.mul a b) at hab
-    have hrel : Fraction.Rel ⟨p, 1, S.one_mem⟩ (Fraction.mul a b) := Quotient.exact hab
-    have hsden : S (a.den * b.den) := S.mul_mem a.den_mem b.den_mem
-    rcases generatedByPrimes_to_list hS hsden with ⟨qs, hqs, hprime⟩
-    have hprod : a.num * b.num = p * listProd qs := by
-      have h0 : p * (a.den * b.den) = a.num * b.num := by
-        have h1 : p * (a.den * b.den) = a.num * b.num * 1 := by
-          simpa [Fraction.Rel, Fraction.mul] using hrel
-        grind
-      calc
-        a.num * b.num = p * (a.den * b.den) := h0.symm
-        _ = p * listProd qs := by rw [hqs]
-    rcases split_listProd_primes_across_product
-        (S := S) (a := a.num) (b := b.num) (p := p)
-        (qs := qs) (fun q hq => hprime q hq) hprod with
-      ⟨xs, ys, a', b', hxs, hys, hsplit, ha, hb, habp⟩
-    have hsx : S (listProd xs) := by
-      apply MultSet.listProd_mem
-      intro q hq
-      exact (hxs q hq).1
-    have hsy : S (listProd ys) := by
-      apply MultSet.listProd_mem
-      intro q hq
-      exact (hys q hq).1
-    have hmul : Irreducible (a' * b') := by simpa [habp] using hp
-    rcases of_irreducible_mul hmul with haunit | hbunit
-    · left
-      change IsUnit (Localization.mk (S := S) a.num a.den a.den_mem)
-      rw [ha]
-      rw [localization_mk_mul_of (S := S) (listProd xs) a' a.den a.den_mem]
-      exact isUnit_mul (localization_isUnit_mk_of_mem (S := S) hsx a.den_mem)
-        (localization_isUnit_of_isUnit (S := S) haunit)
-    · right
-      change IsUnit (Localization.mk (S := S) b.num b.den b.den_mem)
-      rw [hb]
-      rw [localization_mk_mul_of (S := S) (listProd ys) b' b.den b.den_mem]
-      exact isUnit_mul (localization_isUnit_mk_of_mem (S := S) hsy b.den_mem)
-        (localization_isUnit_of_isUnit (S := S) hbunit)
+    obtain ⟨a, s, hs, rfl⟩ := Localization.surj (S := S) x
+    obtain ⟨b, t, ht, rfl⟩ := Localization.surj (S := S) y
+    have hprod : p * (s * t) = a * b := by
+      have hEq :
+          Localization.of (S := S) p =
+            Localization.mk (S := S) (a * b) (s * t) (S.mul_mem hs ht) := by
+        simpa [Localization.mk_mul_mk] using hxy
+      have hEq' :
+          Localization.mk (S := S) p 1 S.one_mem =
+            Localization.mk (S := S) (a * b) (s * t) (S.mul_mem hs ht) := by
+        simpa [Localization.of] using hEq
+      simpa [mul_one] using
+        (Localization.mk_eq_iff (S := S) (hs := S.one_mem) (ht := S.mul_mem hs ht)).1 hEq'
+    rcases hS (s * t) (S.mul_mem hs ht) with hstPrime | hstUnit
+    · have hstdiv : s * t ∣ a * b := ⟨p, by simpa [hprod, mul_assoc, mul_left_comm, mul_comm]⟩
+      rcases hstPrime.2.2 a b hstdiv with hdiva | hdivb
+      · rcases hdiva with ⟨d, hd⟩
+        have hst0 : s * t ≠ 0 := hstPrime.ne_zero
+        have hp_eq : p = d * b := by
+          apply mul_left_cancel₀ hst0
+          calc
+            (s * t) * p = p * (s * t) := by ac_rfl
+            _ = a * b := hprod
+            _ = ((s * t) * d) * b := by rw [hd]
+            _ = (s * t) * (d * b) := by ac_rfl
+        rcases hp.isUnit_or_isUnit hp_eq with hdUnit | hbUnit
+        · left
+          have hx_eq : Localization.mk (S := S) a s hs = Localization.of (S := S) (t * d) := by
+            apply (Localization.mk_eq_iff (S := S) (hs := hs) (ht := S.one_mem)).2
+            simpa [hd, mul_assoc, mul_left_comm, mul_comm]
+          rw [hx_eq]
+          have htUnitLoc : IsUnit (Localization.of (S := S) t) :=
+            Localization.isUnit_of_mem (S := S) ht
+          have hdUnitLoc : IsUnit (Localization.of (S := S) d) :=
+            Localization.isUnit_of_isUnit (S := S) hdUnit
+          simpa [Localization.of_mul] using isUnit_mul htUnitLoc hdUnitLoc
+        · right
+          exact Localization.isUnit_mk_of_isUnit (S := S) hbUnit ht
+      · rcases hdivb with ⟨d, hd⟩
+        have hst0 : s * t ≠ 0 := hstPrime.ne_zero
+        have hp_eq : p = a * d := by
+          apply mul_left_cancel₀ hst0
+          calc
+            (s * t) * p = p * (s * t) := by ac_rfl
+            _ = a * b := hprod
+            _ = a * ((s * t) * d) := by rw [hd]
+            _ = (s * t) * (a * d) := by ac_rfl
+        rcases hp.isUnit_or_isUnit hp_eq with haUnit | hdUnit
+        · left
+          exact Localization.isUnit_mk_of_isUnit (S := S) haUnit hs
+        · right
+          have hy_eq : Localization.mk (S := S) b t ht = Localization.of (S := S) (s * d) := by
+            apply (Localization.mk_eq_iff (S := S) (hs := ht) (ht := S.one_mem)).2
+            simpa [hd, mul_assoc, mul_left_comm, mul_comm]
+          rw [hy_eq]
+          have hsUnitLoc : IsUnit (Localization.of (S := S) s) :=
+            Localization.isUnit_of_mem (S := S) hs
+          have hdUnitLoc : IsUnit (Localization.of (S := S) d) :=
+            Localization.isUnit_of_isUnit (S := S) hdUnit
+          simpa [Localization.of_mul] using isUnit_mul hsUnitLoc hdUnitLoc
+    · have hassoc : Associated p (a * b) := by
+        simpa [hprod] using associated_mul_unit_right p (s * t) hstUnit
+      have habIrred : Irreducible (a * b) := hassoc.irreducible hp
+      exact (habIrred.isUnit_or_isUnit rfl).elim
+        (fun haUnit => Or.inl (Localization.isUnit_mk_of_isUnit (S := S) haUnit hs))
+        (fun hbUnit => Or.inr (Localization.isUnit_mk_of_isUnit (S := S) hbUnit ht))
 
-theorem localization_prime_of_prime {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    {p : α} (hp : Prime p) (havoid : Avoids S p) : Prime (Localization.of (S := S) p) := by
-  refine ⟨?_, ?_, ?_⟩
-  · change Localization.of (S := S) p ≠ (0 : Localization S)
-    intro hp0
-    exact hp.ne_zero ((localization_of_eq_zero_iff (S := S) p).mp hp0)
-  · intro hunit
-    rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
-    refine Quotient.inductionOn x ?_ hx
-    intro a hxa
-    change Quotient.mk (Fraction.relSetoid S) (Fraction.mul ⟨p, 1, S.one_mem⟩ a) =
-        Quotient.mk (Fraction.relSetoid S) Fraction.one at hxa
-    have hrel : Fraction.Rel (Fraction.mul ⟨p, 1, S.one_mem⟩ a) Fraction.one := Quotient.exact hxa
-    have hdiv : p ∣ a.den := by
-      refine ⟨a.num, ?_⟩
-      have h0 : p * a.num = a.den := by
-        have h1 : p * a.num * 1 = 1 * (1 * a.den) := by
-          simpa [Fraction.Rel, Fraction.mul, Fraction.one] using hrel
-        grind
-      exact h0.symm
-    exact havoid a.den a.den_mem hdiv
-  · intro x y hxy
-    rcases hxy with ⟨z, hz⟩
-    refine Quotient.inductionOn₃ x y z ?_ hz
-    intro a b c hEq
-    change Quotient.mk (Fraction.relSetoid S) (Fraction.mul a b) =
-        Quotient.mk (Fraction.relSetoid S) (Fraction.mul ⟨p, 1, S.one_mem⟩ c) at hEq
-    have hrel : Fraction.Rel (Fraction.mul a b) (Fraction.mul ⟨p, 1, S.one_mem⟩ c) :=
-      Quotient.exact hEq
-    have hdivabc : p ∣ (a.num * b.num) * c.den := by
-      refine ⟨c.num * (a.den * b.den), ?_⟩
-      unfold Fraction.Rel Fraction.mul at hrel
-      grind
-    have hdivab : p ∣ a.num * b.num := by
-      rcases hp.2.2 (a.num * b.num) c.den hdivabc with hab | hc
-      · exact hab
-      · exact False.elim (havoid c.den c.den_mem hc)
-    rcases hp.2.2 a.num b.num hdivab with ha | hb
-    · left
-      rcases ha with ⟨d, hd⟩
-      refine ⟨Localization.mk (S := S) d a.den a.den_mem, ?_⟩
-      apply Quotient.sound
-      change Fraction.Rel a (Fraction.mul ⟨p, 1, S.one_mem⟩ ⟨d, a.den, a.den_mem⟩)
-      unfold Fraction.Rel Fraction.mul
-      grind
-    · right
-      rcases hb with ⟨d, hd⟩
-      refine ⟨Localization.mk (S := S) d b.den b.den_mem, ?_⟩
-      apply Quotient.sound
-      change Fraction.Rel b (Fraction.mul ⟨p, 1, S.one_mem⟩ ⟨d, b.den, b.den_mem⟩)
-      unfold Fraction.Rel Fraction.mul
-      grind
-
-theorem dvd_of_localization_dvd {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    (hS : MultSet.GeneratedByPrimes S) {p a : α} (hp : Irreducible p) (havoid : Avoids S p)
+theorem dvd_of_localization_dvd {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p a : α} (hp : Irreducible p) (havoid : Avoids S p)
     (hdiv : Localization.of (S := S) p ∣ Localization.of (S := S) a) : p ∣ a := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
   rcases (Localization.dvd_of_iff (S := S) (a := p) (b := a)).1 hdiv with ⟨s, hs, hsa⟩
   rcases hsa with ⟨c, hc⟩
-  rcases generatedByPrimes_to_list hS hs with ⟨qs, hqs, hprime⟩
-  have heq : a * listProd qs = p * c := by
+  rcases hS s hs with hsPrime | hsUnit
+  · have hsdiv : s ∣ p * c := ⟨a, hc.symm⟩
+    rcases hsPrime.2.2 p c hsdiv with hsp | hsc
+    · have hsIrred : Irreducible s := prime_irreducible hsPrime
+      have hassoc : Associated s p := associated_of_irreducible_of_dvd hsIrred hp hsp
+      exact False.elim (havoid s hs (dvd_of_associated (associated_symm hassoc)))
+    · rcases hsc with ⟨d, hd⟩
+      refine ⟨d, ?_⟩
+      have hs0 : s ≠ 0 := hsPrime.ne_zero
+      have hcancel : s * a = s * (p * d) := by
+        calc
+          s * a = p * c := hc
+          _ = p * (s * d) := by rw [hd]
+          _ = s * (p * d) := by ac_rfl
+      exact mul_left_cancel₀ hs0 hcancel
+  · rcases hsUnit with ⟨u, rfl⟩
+    refine ⟨(↑u⁻¹ : α) * c, ?_⟩
     calc
-      a * listProd qs = a * s := by rw [hqs]
-      _ = s * a := by grind
-      _ = p * c := hc
-  exact dvd_of_mul_listProd_eq hp
-    (fun q hq => havoid q ((hprime q hq).1))
-    (fun q hq => (hprime q hq).2) heq
+      a = (↑u⁻¹ : α) * ((u : α) * a) := by simp [mul_assoc]
+      _ = (↑u⁻¹ : α) * (p * c) := by rw [hc]
+      _ = p * ((↑u⁻¹ : α) * c) := by ac_rfl
 
-theorem prime_of_localization_prime {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    (hS : MultSet.GeneratedByPrimes S) {p : α} (hp : Irreducible p) (havoid : Avoids S p)
+theorem prime_of_localization_prime {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α} (hp : Irreducible p) (havoid : Avoids S p)
     (hploc : Prime (Localization.of (S := S) p)) : Prime p := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
   refine ⟨hp.ne_zero, hp.not_isUnit, ?_⟩
   intro a b hdiv
-  have hlocdiv : Localization.of (S := S) p ∣
-      (Localization.of (S := S) a * Localization.of (S := S) b) := by
+  have hlocdiv : Localization.of (S := S) p ∣ Localization.of (S := S) (a * b) := by
     rcases hdiv with ⟨c, hc⟩
-    refine ⟨Localization.of (S := S) c, ?_⟩
-    rw [← Localization.of_mul (S := S), hc, Localization.of_mul (S := S)]
-  rcases hploc.2.2 (Localization.of (S := S) a) (Localization.of (S := S) b) hlocdiv with hpa | hpb
+    exact ⟨Localization.of (S := S) c, by simpa [hc, Localization.of_mul]⟩
+  rcases hploc.2.2 (Localization.of (S := S) a) (Localization.of (S := S) b)
+      (by simpa [Localization.of_mul] using hlocdiv) with hpa | hpb
   · left
     exact dvd_of_localization_dvd hS hp havoid hpa
   · right
     exact dvd_of_localization_dvd hS hp havoid hpb
 
-theorem nagata_key_lemma {α : Type _} [CommRing α] [IsDomain α] {S : MultSet α}
-    (hS : MultSet.GeneratedByPrimes S) (hUFD : UFD (α := Localization S))
+theorem nagata_key_lemma {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s)
+    (hUFD :
+      @UniqueFactorizationMonoid (Localization S)
+        (by
+          letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
+          infer_instance))
     {p : α} (hp : Irreducible p) : Prime p := by
-  by_cases hmem : ∃ s : α, S s ∧ p ∣ s
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
+  by_cases hmem : ∃ s : α, s ∈ S ∧ p ∣ s
   · rcases hmem with ⟨s, hs, hdiv⟩
-    exact prime_of_irreducible_of_dvd_generated_primes hS hp hs hdiv
+    exact prime_of_irreducible_of_dvd_mem hS hp hs hdiv
   · have havoid : Avoids S p := by
       intro s hs hdiv
       exact hmem ⟨s, hs, hdiv⟩
     have hlocIrred : Irreducible (Localization.of (S := S) p) :=
       localization_irreducible_of_irreducible hS hp havoid
-    have hlocPrime : Prime (Localization.of (S := S) p) := UFD.prime_of_irreducible hUFD hlocIrred
+    letI : UniqueFactorizationMonoid (Localization S) := hUFD
+    have hlocPrime : Prime (Localization.of (S := S) p) :=
+      (UniqueFactorizationMonoid.irreducible_iff_prime).mp hlocIrred
     exact prime_of_localization_prime hS hp havoid hlocPrime
 
 end NagataFactoriality

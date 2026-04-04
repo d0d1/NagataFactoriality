@@ -61,12 +61,6 @@ theorem associated_trans {α : Type*} [Monoid α] {a b c : α} :
 theorem dvd_of_associated {α : Type*} [Monoid α] {a b : α} (h : Associated a b) : a ∣ b :=
   h.dvd
 
-def HasFactorization {α : Type*} [CommRing α] [IsDomain α] : Prop :=
-  WfDvdMonoid α
-
-def UFD {α : Type*} [CommRing α] [IsDomain α] : Prop :=
-  UniqueFactorizationMonoid α
-
 theorem prime_irreducible {α : Type*} [CommRing α] [IsDomain α] {p : α} (hp : Prime p) :
     Irreducible p :=
   hp.irreducible

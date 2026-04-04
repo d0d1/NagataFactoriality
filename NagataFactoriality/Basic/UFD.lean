@@ -4,7 +4,7 @@ import NagataFactoriality.Basic.Noetherian
 namespace NagataFactoriality
 
 theorem ufd_iff_factorization_and_irreducibles_prime {α : Type*} [CommRing α] [IsDomain α] :
-    UFD (α := α) ↔ HasFactorization (α := α) ∧ ∀ p : α, Irreducible p → Prime p := by
+    UniqueFactorizationMonoid α ↔ WfDvdMonoid α ∧ ∀ p : α, Irreducible p → Prime p := by
   constructor
   · intro h
     refine ⟨?_, ?_⟩
@@ -21,24 +21,13 @@ theorem ufd_iff_factorization_and_irreducibles_prime {α : Type*} [CommRing α] 
       intro b hb
       exact hprime b (hf b hb))
 
-theorem UFD.hasFactorization {α : Type*} [CommRing α] [IsDomain α] (h : UFD (α := α)) :
-    HasFactorization (α := α) := by
-  letI : UniqueFactorizationMonoid α := h
-  exact (inferInstance : WfDvdMonoid α)
-
-theorem UFD.prime_of_irreducible {α : Type*} [CommRing α] [IsDomain α]
-    (h : UFD (α := α)) {p : α} (hp : Irreducible p) : Prime p := by
-  letI : UniqueFactorizationMonoid α := h
-  exact (UniqueFactorizationMonoid.irreducible_iff_prime).mp hp
-
 theorem prime_iff_irreducible_of_ufd {α : Type*} [CommRing α] [IsDomain α]
-    (h : UFD (α := α)) {p : α} : Prime p ↔ Irreducible p := by
-  letI : UniqueFactorizationMonoid α := h
-  exact UniqueFactorizationMonoid.irreducible_iff_prime.symm
+    [UniqueFactorizationMonoid α] {p : α} : Prime p ↔ Irreducible p :=
+  UniqueFactorizationMonoid.irreducible_iff_prime.symm
 
 theorem ufd_of_factorization_and_primes {α : Type*} [CommRing α] [IsDomain α]
-    (hfac : HasFactorization (α := α))
-    (hprime : ∀ p : α, Irreducible p → Prime p) : UFD (α := α) := by
+    (hfac : WfDvdMonoid α)
+    (hprime : ∀ p : α, Irreducible p → Prime p) : UniqueFactorizationMonoid α := by
   exact (ufd_iff_factorization_and_irreducibles_prime (α := α)).2 ⟨hfac, hprime⟩
 
 end NagataFactoriality
