@@ -104,4 +104,11 @@ theorem polynomial_uniqueFactorizationMonoid_via_nagata {R : Type*} [CommRing R]
   letI : UniqueFactorizationMonoid R[T;T⁻¹] := laurentPolynomial_uniqueFactorizationMonoid (R := R)
   exact polynomial_uniqueFactorizationMonoid_of_laurent (R := R)
 
+theorem iterated_polynomial_uniqueFactorizationMonoid_via_nagata
+    {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    [UniqueFactorizationMonoid R] : UniqueFactorizationMonoid (Polynomial (Polynomial R)) := by
+  letI : UniqueFactorizationMonoid R[X] :=
+    polynomial_uniqueFactorizationMonoid_via_nagata (R := R)
+  simpa using polynomial_uniqueFactorizationMonoid_via_nagata (R := R[X])
+
 end NagataFactoriality

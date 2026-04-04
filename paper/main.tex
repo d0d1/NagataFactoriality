@@ -156,9 +156,10 @@ The formal contribution is threefold:
 \item Conditional transfer lemmas for divisibility, irreducibility, and
   primality between a noetherian domain and its
   localization~(\S\ref{sec:architecture}).
-\item A theorem-driven application: if~$R$ is a noetherian UFD then~$R[X]$ is
-  a UFD, proved via a Laurent-polynomial localization and the formalized Nagata
-  theorem~(\S\ref{sec:application}).
+\item Two theorem-driven applications: if~$R$ is a noetherian UFD then both
+  $R[X]$ and $R[X][Y]$ are UFDs, obtained via a Laurent-polynomial
+  localization and repeated use of the formalized Nagata theorem
+  ~(\S\ref{sec:application}).
 \end{enumerate}
 Beyond these formal artifacts, the project contributes a case study in the
 interaction between formalization and mathematical hypothesis design: the
@@ -172,7 +173,7 @@ Section~\ref{sec:statement} gives the formal statement.
 Section~\ref{sec:architecture} describes the proof architecture.
 Section~\ref{sec:lean-statements} presents the key Lean declarations verbatim.
 Section~\ref{sec:organization} discusses file organization and API design.
-Section~\ref{sec:application} presents the polynomial-ring application.
+Section~\ref{sec:application} presents the two main applications.
 Section~\ref{sec:lessons} draws proof-engineering and mathematical lessons.
 Section~\ref{sec:related} surveys related work.
 Section~\ref{sec:upstream} discusses prospective Mathlib contributions.
@@ -759,14 +760,19 @@ theorem polynomial_uniqueFactorizationMonoid_via_nagata
     {R : Type*} [CommRing R] [IsDomain R]
     [IsNoetherianRing R] [UniqueFactorizationMonoid R] :
     UniqueFactorizationMonoid R[X]
+
+theorem iterated_polynomial_uniqueFactorizationMonoid_via_nagata
+    {R : Type*} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] [UniqueFactorizationMonoid R] :
+    UniqueFactorizationMonoid (Polynomial (Polynomial R))
 \end{lstlisting}
 
 \noindent
-The final theorem is the composite: from a noetherian UFD~$R$, it first
+The third theorem is the basic composite: from a noetherian UFD~$R$, it first
 constructs the Laurent UFD instance and then descends via the Nagata theorem
-to obtain a UFD instance on~$R[X]$.  Lean's typeclass resolution
-automatically chains through the intermediate instances, so the user-facing
-API is a single theorem with three typeclass hypotheses and one conclusion.
+to obtain a UFD instance on~$R[X]$.  The fourth theorem simply iterates that
+construction once more, reusing the same package to produce a UFD structure on
+$R[X][Y]$.
 
 
 % ======================================================================= %
@@ -908,7 +914,7 @@ case analysis and multiset induction in the project.
 \textbf{File} & \textbf{Lines} & \textbf{File} & \textbf{Lines} \\
 \midrule
 \texttt{Nagata/Lemmas.lean}           & 489
-  & \texttt{Applications/Laurent.lean}  & 98  \\
+  & \texttt{Applications/Laurent.lean}  & 104 \\
 \texttt{Localization/Localization.lean} & 140
   & \texttt{Basic/UFD.lean}             & 65  \\
 \texttt{Basic/Divisibility.lean}      & 54
@@ -931,7 +937,7 @@ independently once its predecessors are built.
 
 
 % ======================================================================= %
-\section{Application: polynomial rings}\label{sec:application}
+\section{Applications: polynomial and iterated polynomial rings}\label{sec:application}
 % ======================================================================= %
 
 The application file \lf{Applications/Laurent.lean} puts the formalized theorem
@@ -1000,6 +1006,29 @@ Finally, \li{polynomial\_uniqueFactorizationMonoid\_via\_nagata} combines
 Steps~3 and~4: given a noetherian UFD~$R$, it constructs the Laurent UFD
 instance and invokes Step~4 to obtain the polynomial UFD instance.
 
+\subsection{A second application: iterated polynomial rings}
+
+\begin{corollary}\label{cor:iterpoly}
+If $R$ is a noetherian UFD, then the iterated polynomial ring $R[X][Y]$ is a
+UFD.
+\end{corollary}
+
+\noindent
+The corresponding Lean theorem appears in the Laurent-application file.  Its
+proof is short but mathematically
+meaningful.  One first applies the Nagata-based polynomial UFD theorem to
+obtain a UFD structure on $R[X]$, and then applies the same result again with
+base ring $R[X]$.  Since polynomial rings over noetherian rings are again
+noetherian, all hypotheses needed for the second step are discharged by
+existing Mathlib instances.
+
+The point of this corollary is not difficulty but reuse.  Corollary~\ref{cor:poly}
+shows that the Nagata package proves a standard theorem.  Corollary~\ref{cor:iterpoly}
+shows that the same package can be invoked again, unchanged, to produce a new
+UFD result one level higher in the ring tower.  This makes the formalized
+theorem look less like a one-off proof script and more like a reusable
+descent principle.
+
 \begin{remark}
 This result is also provable via the Gauss lemma (and is already available in
 Mathlib by that route).  The file \lf{Applications/Gauss.lean} wraps the
@@ -1051,17 +1080,17 @@ of the polynomial-ring theorem:
 \item For any field~$k$, the multivariate polynomial ring
   $k[X_1,\ldots,X_n]$ is a UFD (using Mathlib's
   \li{MvPolynomial.uniqueFactorizationMonoid}).
-\item Iterated polynomial rings $R[X_1]\cdots[X_n]$ over a UFD~$R$ are
-  UFDs.
 \end{enumerate}
 
 \noindent
-These examples are deliberately thin---each is a one- or two-line
-invocation of existing Mathlib infrastructure---but they serve as
-machine-checkable witnesses that the formalization connects cleanly to the
-broader library ecosystem.  In particular, the $\ZZ[X]$ example can be proved
-either via the Gauss lemma (Mathlib's default route) or via the Nagata theorem
-(our route through $\ZZ[X,X^{-1}]$), providing a concrete comparison point.
+These examples are deliberately thin---each is a one- or two-line invocation
+of existing Mathlib infrastructure---but they serve as machine-checkable
+witnesses that the formalization connects cleanly to the broader library
+ecosystem.  In particular, the $\ZZ[X]$ example can be proved either via the
+Gauss lemma (Mathlib's default route) or via the Nagata theorem (our route
+through $\ZZ[X,X^{-1}]$), providing a concrete comparison point.  By contrast,
+Corollary~\ref{cor:iterpoly} above is a genuinely theorem-driven second
+application of the Nagata package itself.
 
 
 % ======================================================================= %
@@ -1179,8 +1208,8 @@ practical.
 
 \subsection{Formalization effort and Lean~4 ergonomics}
 
-The total formalization comprises approximately 970 lines of Lean~4 source
-across 16 files, with 74 formally verified declarations (theorem/lemma/def)
+The total formalization comprises approximately 976 lines of Lean~4 source
+across 16 files, with 75 formally verified theorem/lemma declarations
 and zero uses of \li{sorry}, \li{admit}, or \li{native\_decide}.  The
 development was carried out over a period of several weeks by a single author
 using Lean~4.24.0 and Mathlib (commit hash recorded in \lf{lean-toolchain} and
@@ -1336,8 +1365,8 @@ Table~\ref{tab:stats} summarizes the artifact statistics.
 \textbf{Metric} & \textbf{Value} \\
 \midrule
 Lean source files              & 16  \\
-Lines of Lean source           & 970 \\
-Theorem/lemma declarations     & 74  \\
+Lines of Lean source           & 976 \\
+Theorem/lemma declarations     & 75  \\
 \li{sorry}/\li{admit}/\li{axiom} & 0   \\
 Lean version                   & 4.24.0 \\
 \bottomrule
@@ -1411,9 +1440,10 @@ Several directions are natural continuations:
 \item \textbf{Mathlib integration.}  Abstracting the localization interface
   from the concrete \li{Localization} type to \li{IsLocalization} would make
   the results directly usable in Mathlib's ecosystem.
-\item \textbf{Richer applications.}  The formalized theorem could be applied to
-  establish unique factorization in power-series rings, rings of algebraic
-  integers, or other settings where a Nagata-style argument is natural.
+  \item \textbf{Richer applications.}  Beyond the polynomial and iterated-polynomial
+  corollaries formalized here, the theorem could be applied to establish unique
+  factorization in power-series rings, rings of algebraic integers, or other
+  settings where a Nagata-style argument is natural.
 \item \textbf{Generalization.}  The ideal-theoretic generalization of Nagata's
   theorem (involving the class group and divisorial ideals) is a natural next
   target, though it would require substantially more infrastructure than is
