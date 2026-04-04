@@ -85,24 +85,14 @@
 
 \begin{abstract}
 We present a Lean~4\,/\,Mathlib formalization of Nagata's factoriality
-theorem for noetherian integral domains.  The central hypothesis is a
-\emph{prime-generated} condition on the multiplicative set: every element of
-the submonoid is a finite product of elements that are both prime in the ring
-and members of the submonoid.  Under this hypothesis, if the localization is a
-unique factorization domain (UFD), then so is the base ring.
-
-The formal development comprises conditional transfer lemmas for divisibility,
-irreducibility, and primality between a domain and a localization at a
-prime-generated submonoid, together with the packaging of these ingredients
-into a reusable Nagata theorem.  As an application, we prove that if~$R$ is a
-noetherian UFD then the polynomial ring~$R[X]$ is a UFD, by constructing a
-Laurent-polynomial localization and invoking the formalized theorem.
-
-The formalization exercise surfaced a substantive mathematical issue: an
-earlier \emph{prime-or-unit} hypothesis on the submonoid turned out to be
-degenerate, and the correct prime-generated formulation was developed as a
-direct consequence of the failed attempt to instantiate the restricted theorem.
-No public formalization of Nagata's factoriality theorem is known to us in
+theorem: if~$R$ is a noetherian domain and $S\subseteq R$ is a
+\emph{prime-generated} submonoid such that $S^{-1}R$ is a UFD, then~$R$
+itself is a UFD.  The prime-generated hypothesis---every element of~$S$ is a
+finite product of primes belonging to~$S$---replaces a superficially cleaner
+but degenerate ``prime-or-unit'' condition that the formalization effort
+exposed.  As an application, we prove that $R[X]$ is a UFD whenever~$R$ is a
+noetherian UFD, via a Laurent-polynomial localization and the formalized
+Nagata theorem.  No public formalization of this result is known to us in
 Lean, Coq, or Isabelle.
 \end{abstract}
 
@@ -140,6 +130,15 @@ classical factoriality results: while the library provides extensive
 infrastructure for unique factorization, localization, and polynomial algebra,
 no Nagata-style transfer theorem was available.
 
+Nagata's theorem is an attractive formalization target for several reasons.
+It is compact enough to be self-contained in a modest development, yet it
+forces nontrivial interaction between three pillars of commutative algebra:
+localization, the noetherian condition, and unique factorization.  The proof
+demands transfer lemmas that move divisibility, irreducibility, and primality
+across the localization map---exactly the kind of multi-step reasoning where
+formalization provides high assurance.  Moreover, its immediate corollary for
+polynomial rings makes it a practically useful building block.
+
 An earlier version of this project stated the main result under the hypothesis
 that every element of the multiplicative set~$S$ is prime or a unit---a
 condition that is superficially clean but essentially degenerate for any
@@ -171,10 +170,12 @@ textbook exposition might.
 Section~\ref{sec:background} reviews the mathematical background.
 Section~\ref{sec:statement} gives the formal statement.
 Section~\ref{sec:architecture} describes the proof architecture.
+Section~\ref{sec:lean-statements} presents the key Lean declarations verbatim.
 Section~\ref{sec:organization} discusses file organization and API design.
 Section~\ref{sec:application} presents the polynomial-ring application.
 Section~\ref{sec:lessons} draws proof-engineering and mathematical lessons.
 Section~\ref{sec:related} surveys related work.
+Section~\ref{sec:upstream} discusses prospective Mathlib contributions.
 Section~\ref{sec:artifact} describes the artifact.
 Section~\ref{sec:conclusion} concludes.
 
@@ -1290,31 +1291,26 @@ Lean/Mathlib, Coq/MathComp, or Isabelle/AFP.  This is a statement about the
 public state of these libraries at the time of writing, not a claim that no
 unpublished or in-progress formalization exists.
 
+To sharpen the distinction: Bordg's Isabelle work and Mathlib's own
+localization API provide generic \emph{localization infrastructure} but no
+factoriality transfer theorem.  The MathComp Gauss-lemma proof establishes
+$R[X]$ is a UFD by a different route that does not involve localization at all.
+Baanen et al.'s Dedekind-domain formalization shares localization machinery but
+targets class groups and fractional ideals, not factoriality descent.  The
+present work fills the specific gap of a reusable \emph{localization-to-base}
+UFD transfer theorem.
+
 
 % ======================================================================= %
 \section{Prospective library contributions}\label{sec:upstream}
 % ======================================================================= %
 
-Not every result in the development is a candidate for upstreaming to Mathlib.
-We distinguish three tiers:
-
-\begin{description}[nosep,leftmargin=1em,style=nextline]
-\item[Good candidates.]
-  The localization helpers and generic submonoid lemmas
-  (e.g., \li{zero\_notMem\_of\_primeGenerated},
-  \li{multiset\_prod\_mem\_of\_factors}) are reusable beyond the present
-  theorem and fit naturally into Mathlib's localization and submonoid APIs.
-\item[Conditional candidates.]
-  The \li{PrimeGenerated} predicate and its transfer lemmas are
-  mathematically natural, but would need API stabilization and generalization
-  to the \li{IsLocalization} typeclass before they fit Mathlib's abstraction
-  boundaries.
-\item[Paper-level contribution.]
-  The Nagata theorem itself and its specific proof packaging are the core
-  contribution of this repository.  Whether they belong in Mathlib depends on
-  whether the library community considers the result sufficiently demanded to
-  justify the maintenance cost.
-\end{description}
+We classify the results by Mathlib readiness.  The localization
+helpers are directly upstreamable.  The \li{PrimeGenerated} predicate
+and its transfer lemmas are natural candidates once refactored to
+Mathlib's abstract \li{IsLocalization} typeclass.  The Nagata theorem
+itself is the core paper-level contribution; whether it belongs in
+Mathlib depends on community demand.
 
 
 % ======================================================================= %
