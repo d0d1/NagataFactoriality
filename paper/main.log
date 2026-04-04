@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.20)  4 APR 2026 18:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.20)  4 APR 2026 18:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -449,7 +449,7 @@ Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
 )
 \c@theorem=\count326
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 78
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 79
 .
  (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
@@ -461,24 +461,24 @@ File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 ) (main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 79.
+LaTeX Font Info:    ... okay on input line 79.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -514,13 +514,13 @@ LaTeX Font Info:    ... okay on input line 78.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 78.
-Package microtype Info: Applying patch `item' on input line 78.
-Package microtype Info: Applying patch `toc' on input line 78.
-Package microtype Info: Applying patch `eqnum' on input line 78.
-Package microtype Info: Applying patch `footnote' on input line 78.
-Package microtype Info: Applying patch `verbatim' on input line 78.
-LaTeX Info: Redefining \microtypesetup on input line 78.
+LaTeX Info: Redefining \microtypecontext on input line 79.
+Package microtype Info: Applying patch `item' on input line 79.
+Package microtype Info: Applying patch `toc' on input line 79.
+Package microtype Info: Applying patch `eqnum' on input line 79.
+Package microtype Info: Applying patch `footnote' on input line 79.
+Package microtype Info: Applying patch `verbatim' on input line 79.
+LaTeX Info: Redefining \microtypesetup on input line 79.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -536,7 +536,7 @@ Package microtype Info: No adjustment of character kerning.
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
-Package hyperref Info: Link coloring ON on input line 78.
+Package hyperref Info: Link coloring ON on input line 79.
  (main.out) (main.out)
 \@outlinefile=\write3
 \openout3 = `main.out'.
@@ -559,35 +559,35 @@ Package hyperref Info: Link coloring ON on input line 78.
 \everyMPtoPDFconversion=\toks35
 )
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 8
-0.
+1.
  (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 8
-0.
+1.
 
 (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-80.
+81.
 
 (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-80.
+81.
 
 (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 80.
+(Font)              <12> on input line 81.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 80.
+(Font)              <8> on input line 81.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 80.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 80.
+(Font)              <6> on input line 81.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 81.
 
 
 (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
@@ -596,7 +596,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 80.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 81.
 
  (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -605,13 +605,13 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 96.
+(Font)              <10> on input line 97.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 96.
+(Font)              <7> on input line 97.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 96.
+(Font)              <5> on input line 97.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 117.
+(Font)              <10.95> on input line 118.
  [1
 
 {C:/Users/arfreita/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/a
@@ -621,7 +621,7 @@ freita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathit.enc}{C:/Users
 arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathsy.enc}]
 [2]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-69.
+70.
  (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -633,58 +633,58 @@ Package microtype Info: Loading generic protrusion settings for font family
 [3{C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathex
 .enc}]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 3
-28.
+29.
  (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-Underfull \hbox (badness 3229) in paragraph at lines 331--333
+Underfull \hbox (badness 3229) in paragraph at lines 332--334
 []\T1/lmtt/m/n/10.95 nagata_theorem_of_finite_prime_generators \T1/lmr/m/n/10.9
 5 (+20) cov-ers the es-pe-cially com-mon finite-
  []
 
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 368.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 369.
 [4{C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.en
 c}] [5]
-Underfull \hbox (badness 10000) in paragraph at lines 534--535
+Underfull \hbox (badness 10000) in paragraph at lines 535--536
 []\T1/lmtt/m/n/10 dvd_of_localization_dvd_
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 536--537
+Underfull \hbox (badness 10000) in paragraph at lines 537--538
 []\T1/lmtt/m/n/10 localization_irreducible_
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 537--537
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
 []\T1/lmtt/m/n/10 localization_irreducible_
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 538--539
+Underfull \hbox (badness 10000) in paragraph at lines 539--540
 []\T1/lmtt/m/n/10 prime_of_localization_prime_
  []
 
 [6]
-Overfull \hbox (19.38037pt too wide) in paragraph at lines 622--630
+Overfull \hbox (19.38037pt too wide) in paragraph at lines 623--631
 []\T1/lmr/m/n/10.95 (-20) The file also in-cludes ex-plicit proofs of fac-tor-i
 za-tion unique-ness. The the-o-rem \T1/lmtt/m/n/10.95 factorization_unique
  []
 
 [7] [8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 789--790
+Underfull \hbox (badness 10000) in paragraph at lines 790--791
 []\T1/lmr/m/n/10.95 (+20) Divisibility, as-so-ci-at-ed-ness, prime--
  []
 
 [10]
-Overfull \hbox (3.67586pt too wide) in paragraph at lines 895--899
+Overfull \hbox (3.67586pt too wide) in paragraph at lines 896--900
 \T1/lmr/m/n/10.95 (-20) Table [][]3[][] gives a per-file break-down of the for-
 mal-iza-tion. The dom-i-nant mod-ule is \T1/lmtt/m/n/10.95 Nagata/Lemmas.lean\T
 1/lmr/m/n/10.95 (-20) ,
  []
 
 [11] [12] [13] [14]
-Overfull \hbox (5.64627pt too wide) in paragraph at lines 1190--1194
+Overfull \hbox (5.64627pt too wide) in paragraph at lines 1191--1195
 []\T1/lmr/bx/n/10.95 (-20) Typeclass di-a-monds. \T1/lmr/m/n/10.95 (-20) The \T
 1/lmtt/m/n/10.95 Localization \T1/lmr/m/n/10.95 (-20) type car-ries mul-ti-ple 
 paths to \T1/lmtt/m/n/10.95 CommMonoidWithZero\T1/lmr/m/n/10.95 (-20) ,
@@ -699,13 +699,13 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 112676FEA442853B90555F0FC0783D76;10366.
  ) 
 Here is how much of TeX's memory you used:
- 15392 strings out of 467871
- 236579 string characters out of 5416924
- 956965 words of memory out of 5000000
- 43596 multiletter control sequences out of 15000+600000
+ 15393 strings out of 467871
+ 236586 string characters out of 5416924
+ 944982 words of memory out of 5000000
+ 43597 multiletter control sequences out of 15000+600000
  739097 words of font info for 242 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,10n,79p,1003b,2020s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,10n,79p,1003b,1999s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx10
 .pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmb
 x12.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/
@@ -715,16 +715,18 @@ ic/lm/lmmi8.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/pu
 blic/lm/lmr10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/lm/lmr12.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type
 1/public/lm/lmr17.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/ty
-pe1/public/lm/lmr8.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/t
-ype1/public/lm/lmri10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/font
-s/type1/public/lm/lmsy10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/f
-onts/type1/public/lm/lmsy8.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/lm/lmtk10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiK
-TeX/fonts/type1/public/lm/lmtt10.pfb><C:/Users/arfreita/AppData/Local/Programs/
-MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (20 pages, 435714 bytes).
+pe1/public/lm/lmr7.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/lm/lmr8.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/lm/lmri10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fon
+ts/type1/public/lm/lmsy10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/lm/lmsy7.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/lm/lmsy8.pfb><C:/Users/arfreita/AppData/Local/Programs/MiK
+TeX/fonts/type1/public/lm/lmtk10.pfb><C:/Users/arfreita/AppData/Local/Programs/
+MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/Users/arfreita/AppData/Local/Progra
+ms/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on main.pdf (20 pages, 459592 bytes).
 PDF statistics:
- 620 PDF objects out of 1000 (max. 8388607)
+ 630 PDF objects out of 1000 (max. 8388607)
  203 named destinations out of 1000 (max. 500000)
  58257 words of extra memory for PDF output out of 61914 (max. 10000000)
 
