@@ -44,6 +44,31 @@ theorem primeGenerated_powers {α : Type*} [CommRing α] {p : α} (hp : Prime p)
   subst hqp
   refine ⟨⟨1, by simp⟩, hp⟩
 
+theorem primeGenerated_closure_of_primes {α : Type*} [CommRing α] {s : Set α}
+    (hs : ∀ q ∈ s, Prime q) : PrimeGenerated (Submonoid.closure s) := by
+  intro x hx
+  induction hx using Submonoid.closure_induction (s := s) with
+  | mem x hx =>
+      refine ⟨{x}, ?_, by simp⟩
+      intro q hq
+      have hqx : q = x := Multiset.mem_singleton.mp hq
+      subst q
+      exact ⟨Submonoid.subset_closure hx, hs x hx⟩
+  | one =>
+      exact ⟨0, by simp⟩
+  | mul x y hx hy ihx ihy =>
+      rcases ihx with ⟨fx, hfx, hprodx⟩
+      rcases ihy with ⟨fy, hfy, hprody⟩
+      refine ⟨fx + fy, ?_, by simp [hprodx, hprody, Multiset.prod_add]⟩
+      intro q hq
+      rcases Multiset.mem_add.mp hq with hq | hq
+      · exact hfx q hq
+      · exact hfy q hq
+
+theorem primeGenerated_closure_finset_of_primes {α : Type*} [CommRing α] (s : Finset α)
+    (hs : ∀ q ∈ s, Prime q) : PrimeGenerated (Submonoid.closure (↑s : Set α)) :=
+  primeGenerated_closure_of_primes (s := (↑s : Set α)) (fun q hq => hs q hq)
+
 theorem prime_of_irreducible_of_dvd_prime_factors {α : Type*} [CommRing α] [IsDomain α]
     {f : Multiset α} (hf : ∀ q ∈ f, Prime q) {p : α}
     (hp : Irreducible p) (hdiv : p ∣ f.prod) : Prime p := by

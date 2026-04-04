@@ -15,6 +15,30 @@ theorem nagata_theorem {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R
     (hasFactorization_of_noetherian (α := R))
     (fun p hp => nagata_key_lemma_primeGenerated (S := S) hS hUFD hp)
 
+theorem nagata_theorem_of_prime_generators {R : Type*} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] (s : Set R) (hs : ∀ q ∈ s, Prime q)
+    (hUFD :
+      @UniqueFactorizationMonoid (Localization (Submonoid.closure s))
+        (by
+          let hS : PrimeGenerated (Submonoid.closure s) := primeGenerated_closure_of_primes hs
+          letI : Fact ((0 : R) ∉ Submonoid.closure s) := ⟨zero_notMem_of_primeGenerated hS⟩
+          infer_instance)) :
+    UniqueFactorizationMonoid R := by
+  exact nagata_theorem (R := R) (Submonoid.closure s) (primeGenerated_closure_of_primes hs) hUFD
+
+theorem nagata_theorem_of_finite_prime_generators {R : Type*} [CommRing R] [IsDomain R]
+    [IsNoetherianRing R] (s : Finset R) (hs : ∀ q ∈ s, Prime q)
+    (hUFD :
+      @UniqueFactorizationMonoid (Localization (Submonoid.closure (↑s : Set R)))
+        (by
+          let hS : PrimeGenerated (Submonoid.closure (↑s : Set R)) :=
+            primeGenerated_closure_finset_of_primes s hs
+          letI : Fact ((0 : R) ∉ Submonoid.closure (↑s : Set R)) :=
+            ⟨zero_notMem_of_primeGenerated hS⟩
+          infer_instance)) :
+    UniqueFactorizationMonoid R := by
+  exact nagata_theorem_of_prime_generators (R := R) (s := (↑s : Set R)) (fun q hq => hs q hq) hUFD
+
 theorem nagata_theorem_of_prime_or_unit {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     (S : Submonoid R) (hS : ∀ s ∈ S, Prime s ∨ IsUnit s)
     (hUFD :
