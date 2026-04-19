@@ -1,4 +1,5 @@
 import NagataFactoriality.Localization.Properties
+import NagataFactoriality.Localization.IsLocalization
 import NagataFactoriality.Basic.UFD
 
 namespace NagataFactoriality
@@ -144,11 +145,13 @@ theorem dvd_of_mul_eq_prime_factors {α : Type*} [CommRing α] [IsDomain α]
         exact ih htail htailNot hcancel
   exact hmain f hf hnot hEq
 
-theorem dvd_of_localization_dvd_primeGenerated {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
-    (hS : PrimeGenerated S) {p a : α} (hp : Irreducible p) (havoid : Avoids S p)
-    (hdiv : Localization.of (S := S) p ∣ Localization.of (S := S) a) : p ∣ a := by
+theorem dvd_of_localization_dvd_primeGenerated_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : PrimeGenerated S) {p a : α} (hp : Irreducible p)
+    (havoid : Avoids S p) (hdiv : algebraMap α β p ∣ algebraMap α β a) : p ∣ a := by
   letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
-  rcases (Localization.dvd_of_iff (S := S) (a := p) (b := a)).1 hdiv with ⟨s, hs, hsa⟩
+  rcases (NagataFactoriality.IsLocalization.dvd_map_iff (S := S) (β := β) (a := p) (b := a)).1 hdiv with
+    ⟨s, hs, hsa⟩
   rcases hsa with ⟨c, hc⟩
   rcases hS s hs with ⟨f, hf, hprod⟩
   have hnot : ∀ q ∈ f, ¬ p ∣ q := by
@@ -161,6 +164,15 @@ theorem dvd_of_localization_dvd_primeGenerated {α : Type*} [CommRing α] [IsDom
   have hEq : f.prod * a = p * c := by
     simpa [hprod] using hc
   exact dvd_of_mul_eq_prime_factors (fun q hq => (hf q hq).2) hp hnot hEq
+
+theorem dvd_of_localization_dvd_primeGenerated {α : Type*} [CommRing α] [IsDomain α]
+    {S : Submonoid α} (hS : PrimeGenerated S) {p a : α} (hp : Irreducible p)
+    (havoid : Avoids S p) (hdiv : Localization.of (S := S) p ∣ Localization.of (S := S) a) : p ∣ a := by
+  letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
+  letI : IsDomain (Localization S) := by infer_instance
+  simpa [Localization.of] using
+    (dvd_of_localization_dvd_primeGenerated_isLocalization
+      (β := Localization S) (S := S) hS hp havoid hdiv)
 
 theorem multiset_prod_mem_of_factors {α : Type*} [CommMonoid α] {S : Submonoid α} {f : Multiset α}
     (hf : ∀ q ∈ f, q ∈ S) : f.prod ∈ S := by
@@ -245,34 +257,46 @@ theorem split_prime_factors_of_mul_eq {α : Type*} [CommRing α] [IsDomain α]
             _ = (q ::ₘ f₂).prod * b' := by simp [mul_assoc]
   exact hmain f a b hf hEq
 
-theorem localization_irreducible_of_irreducible_primeGenerated {α : Type*} [CommRing α] [IsDomain α]
-    {S : Submonoid α} (hS : PrimeGenerated S) {p : α} (hp : Irreducible p)
-    (havoid : Avoids S p) : Irreducible (Localization.of (S := S) p) := by
+theorem localization_irreducible_of_irreducible_primeGenerated_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : PrimeGenerated S) {p : α} (hp : Irreducible p)
+    (havoid : Avoids S p) : Irreducible (algebraMap α β p) := by
   letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
   refine ⟨?_, ?_⟩
   · intro hunit
-    have hdiv : Localization.of (S := S) p ∣ (1 : Localization S) := by
+    have hdiv : algebraMap α β p ∣ (1 : β) := by
       rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
       exact ⟨x, hx.symm⟩
-    have hdiv' : Localization.of (S := S) p ∣ Localization.of (S := S) (1 : α) := by
+    have hdiv' : algebraMap α β p ∣ algebraMap α β (1 : α) := by
       simpa using hdiv
-    rcases (Localization.dvd_of_iff (S := S) (a := p) (b := 1)).1 hdiv' with ⟨s, hs, hps⟩
+    rcases (NagataFactoriality.IsLocalization.dvd_map_iff
+      (S := S) (β := β) (a := p) (b := 1)).1 hdiv' with ⟨s, hs, hps⟩
     exact havoid s hs (by simpa using hps)
   · intro x y hxy
-    obtain ⟨a, s, hs, rfl⟩ := Localization.surj (S := S) x
-    obtain ⟨b, t, ht, rfl⟩ := Localization.surj (S := S) y
+    obtain ⟨a, s, hs, rfl⟩ := NagataFactoriality.IsLocalization.surj (S := S) (β := β) x
+    obtain ⟨b, t, ht, rfl⟩ := NagataFactoriality.IsLocalization.surj (S := S) (β := β) y
     have hEq :
         p * (s * t) = a * b := by
       have hloc :
-          Localization.of (S := S) p =
-            Localization.mk (S := S) (a * b) (s * t) (S.mul_mem hs ht) := by
-        simpa [Localization.mk_mul_mk] using hxy
+          algebraMap α β p =
+            _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := by
+        calc
+          algebraMap α β p =
+              _root_.IsLocalization.mk' β a ⟨s, hs⟩ * _root_.IsLocalization.mk' β b ⟨t, ht⟩ := hxy
+          _ = _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := by
+              simpa using (_root_.IsLocalization.mk'_mul
+                (M := S) (S := β) a b ⟨s, hs⟩ ⟨t, ht⟩).symm
       have hmk :
-          Localization.mk (S := S) p 1 S.one_mem =
-            Localization.mk (S := S) (a * b) (s * t) (S.mul_mem hs ht) := by
-        simpa [Localization.of] using hloc
+          _root_.IsLocalization.mk' β p ⟨1, S.one_mem⟩ =
+            _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := by
+        calc
+          _root_.IsLocalization.mk' β p ⟨1, S.one_mem⟩ = algebraMap α β p := by
+            simpa using (_root_.IsLocalization.mk'_one (S := β) p)
+          _ = _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := hloc
       simpa [mul_one] using
-        (Localization.mk_eq_iff (S := S) (hs := S.one_mem) (ht := S.mul_mem hs ht)).1 hmk
+        (NagataFactoriality.IsLocalization.mk'_eq_iff
+          (S := S) (β := β) (a := p) (b := a * b)
+          (s := 1) (t := s * t) S.one_mem (S.mul_mem hs ht)).1 hmk
     rcases hS (s * t) (S.mul_mem hs ht) with ⟨f, hf, hfprod⟩
     rcases split_prime_factors_of_mul_eq (fun q hq => (hf q hq).2) hp (by simpa [hfprod] using hEq)
         with ⟨f₁, f₂, a', b', hpart, ha, hb, hpab⟩
@@ -283,44 +307,86 @@ theorem localization_irreducible_of_irreducible_primeGenerated {α : Type*} [Com
         exact (hf q (by rw [← hpart]; exact Multiset.mem_add.mpr (Or.inl hq))).1
       have hprodMem : f₁.prod ∈ S := multiset_prod_mem_of_factors hf₁mem
       have hx_eq :
-          Localization.mk (S := S) a s hs =
-            Localization.of (S := S) f₁.prod * Localization.mk (S := S) a' s hs := by
+          _root_.IsLocalization.mk' β a ⟨s, hs⟩ =
+            algebraMap α β f₁.prod * _root_.IsLocalization.mk' β a' ⟨s, hs⟩ := by
         rw [ha]
         symm
-        exact Localization.of_mul_mk (S := S) f₁.prod a' s hs
+        exact NagataFactoriality.IsLocalization.map_mul_mk' (S := S) (β := β) f₁.prod a' s hs
       rw [hx_eq]
-      exact isUnit_mul (Localization.isUnit_of_mem (S := S) hprodMem)
-        (Localization.isUnit_mk_of_isUnit (S := S) haUnit hs)
+      exact isUnit_mul
+        (NagataFactoriality.IsLocalization.isUnit_map_of_mem (S := S) (β := β) hprodMem)
+        (NagataFactoriality.IsLocalization.isUnit_mk'_of_isUnit (S := S) (β := β) haUnit hs)
     · right
       have hf₂mem : ∀ q ∈ f₂, q ∈ S := by
         intro q hq
         exact (hf q (by rw [← hpart]; exact Multiset.mem_add.mpr (Or.inr hq))).1
       have hprodMem : f₂.prod ∈ S := multiset_prod_mem_of_factors hf₂mem
       have hy_eq :
-          Localization.mk (S := S) b t ht =
-            Localization.of (S := S) f₂.prod * Localization.mk (S := S) b' t ht := by
+          _root_.IsLocalization.mk' β b ⟨t, ht⟩ =
+            algebraMap α β f₂.prod * _root_.IsLocalization.mk' β b' ⟨t, ht⟩ := by
         rw [hb]
         symm
-        exact Localization.of_mul_mk (S := S) f₂.prod b' t ht
+        exact NagataFactoriality.IsLocalization.map_mul_mk' (S := S) (β := β) f₂.prod b' t ht
       rw [hy_eq]
-      exact isUnit_mul (Localization.isUnit_of_mem (S := S) hprodMem)
-        (Localization.isUnit_mk_of_isUnit (S := S) hbUnit ht)
+      exact isUnit_mul
+        (NagataFactoriality.IsLocalization.isUnit_map_of_mem (S := S) (β := β) hprodMem)
+        (NagataFactoriality.IsLocalization.isUnit_mk'_of_isUnit (S := S) (β := β) hbUnit ht)
 
-theorem prime_of_localization_prime_primeGenerated {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
-    (hS : PrimeGenerated S) {p : α} (hp : Irreducible p) (havoid : Avoids S p)
-    (hploc : Prime (Localization.of (S := S) p)) : Prime p := by
+theorem localization_irreducible_of_irreducible_primeGenerated {α : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} (hS : PrimeGenerated S) {p : α}
+    (hp : Irreducible p) (havoid : Avoids S p) : Irreducible (Localization.of (S := S) p) := by
+  letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
+  letI : IsDomain (Localization S) := by infer_instance
+  simpa [Localization.of] using
+    (localization_irreducible_of_irreducible_primeGenerated_isLocalization
+      (β := Localization S) (S := S) hS hp havoid)
+
+theorem prime_of_localization_prime_primeGenerated_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : PrimeGenerated S) {p : α} (hp : Irreducible p)
+    (havoid : Avoids S p) (hploc : Prime (algebraMap α β p)) : Prime p := by
   letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
   refine ⟨hp.ne_zero, hp.not_isUnit, ?_⟩
   intro a b hdiv
-  have hlocdiv : Localization.of (S := S) p ∣ Localization.of (S := S) (a * b) := by
+  have hlocdiv : algebraMap α β p ∣ algebraMap α β (a * b) := by
     rcases hdiv with ⟨c, hc⟩
-    exact ⟨Localization.of (S := S) c, by simp [hc, Localization.of_mul]⟩
-  rcases hploc.2.2 (Localization.of (S := S) a) (Localization.of (S := S) b)
-      (by simpa [Localization.of_mul] using hlocdiv) with hpa | hpb
+    exact ⟨algebraMap α β c, by simp [map_mul, hc]⟩
+  rcases hploc.2.2 (algebraMap α β a) (algebraMap α β b)
+      (by simpa [map_mul] using hlocdiv) with hpa | hpb
   · left
-    exact dvd_of_localization_dvd_primeGenerated hS hp havoid hpa
+    exact dvd_of_localization_dvd_primeGenerated_isLocalization
+      (β := β) (S := S) hS hp havoid hpa
   · right
-    exact dvd_of_localization_dvd_primeGenerated hS hp havoid hpb
+    exact dvd_of_localization_dvd_primeGenerated_isLocalization
+      (β := β) (S := S) hS hp havoid hpb
+
+theorem prime_of_localization_prime_primeGenerated {α : Type*} [CommRing α] [IsDomain α]
+    {S : Submonoid α} (hS : PrimeGenerated S) {p : α} (hp : Irreducible p)
+    (havoid : Avoids S p) (hploc : Prime (Localization.of (S := S) p)) : Prime p := by
+  letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
+  letI : IsDomain (Localization S) := by infer_instance
+  simpa [Localization.of] using
+    (prime_of_localization_prime_primeGenerated_isLocalization
+      (β := Localization S) (S := S) hS hp havoid hploc)
+
+theorem nagata_key_lemma_primeGenerated_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : PrimeGenerated S) [UniqueFactorizationMonoid β]
+    {p : α} (hp : Irreducible p) : Prime p := by
+  letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
+  by_cases hmem : ∃ s : α, s ∈ S ∧ p ∣ s
+  · rcases hmem with ⟨s, hs, hdiv⟩
+    exact prime_of_irreducible_of_dvd_mem_primeGenerated hS hp hs hdiv
+  · have havoid : Avoids S p := by
+      intro s hs hdiv
+      exact hmem ⟨s, hs, hdiv⟩
+    have hlocIrred : Irreducible (algebraMap α β p) :=
+      localization_irreducible_of_irreducible_primeGenerated_isLocalization
+        (β := β) (S := S) hS hp havoid
+    have hlocPrime : Prime (algebraMap α β p) :=
+      (UniqueFactorizationMonoid.irreducible_iff_prime).mp hlocIrred
+    exact prime_of_localization_prime_primeGenerated_isLocalization
+      (β := β) (S := S) hS hp havoid hlocPrime
 
 theorem nagata_key_lemma_primeGenerated {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
     (hS : PrimeGenerated S)
@@ -331,18 +397,11 @@ theorem nagata_key_lemma_primeGenerated {α : Type*} [CommRing α] [IsDomain α]
           infer_instance))
     {p : α} (hp : Irreducible p) : Prime p := by
   letI : Fact ((0 : α) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
-  by_cases hmem : ∃ s : α, s ∈ S ∧ p ∣ s
-  · rcases hmem with ⟨s, hs, hdiv⟩
-    exact prime_of_irreducible_of_dvd_mem_primeGenerated hS hp hs hdiv
-  · have havoid : Avoids S p := by
-      intro s hs hdiv
-      exact hmem ⟨s, hs, hdiv⟩
-    have hlocIrred : Irreducible (Localization.of (S := S) p) :=
-      localization_irreducible_of_irreducible_primeGenerated hS hp havoid
-    letI : UniqueFactorizationMonoid (Localization S) := hUFD
-    have hlocPrime : Prime (Localization.of (S := S) p) :=
-      (UniqueFactorizationMonoid.irreducible_iff_prime).mp hlocIrred
-    exact prime_of_localization_prime_primeGenerated hS hp havoid hlocPrime
+  letI : IsDomain (Localization S) := by infer_instance
+  letI : UniqueFactorizationMonoid (Localization S) := hUFD
+  simpa [Localization.of] using
+    (nagata_key_lemma_primeGenerated_isLocalization
+      (β := Localization S) (S := S) hS hp)
 
 theorem prime_of_irreducible_of_dvd_mem {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
     (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p s : α}
@@ -353,33 +412,45 @@ theorem prime_of_irreducible_of_dvd_mem {α : Type*} [CommRing α] [IsDomain α]
     exact prime_of_associated hsPrime (associated_symm hassoc)
   · exact False.elim (hp.not_isUnit (isUnit_of_dvd_unit hdiv hsUnit))
 
-theorem localization_irreducible_of_irreducible {α : Type*} [CommRing α] [IsDomain α]
-    {S : Submonoid α} (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α} (hp : Irreducible p)
-    (havoid : Avoids S p) : Irreducible (Localization.of (S := S) p) := by
+theorem localization_irreducible_of_irreducible_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α}
+    (hp : Irreducible p) (havoid : Avoids S p) : Irreducible (algebraMap α β p) := by
   letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
   refine ⟨?_, ?_⟩
   · intro hunit
-    have hdiv : Localization.of (S := S) p ∣ (1 : Localization S) := by
+    have hdiv : algebraMap α β p ∣ (1 : β) := by
       rcases isUnit_iff_exists_inv.mp hunit with ⟨x, hx⟩
       exact ⟨x, hx.symm⟩
-    have hdiv' : Localization.of (S := S) p ∣ Localization.of (S := S) (1 : α) := by
+    have hdiv' : algebraMap α β p ∣ algebraMap α β (1 : α) := by
       simpa using hdiv
-    rcases (Localization.dvd_of_iff (S := S) (a := p) (b := 1)).1 hdiv' with ⟨s, hs, hps⟩
+    rcases (NagataFactoriality.IsLocalization.dvd_map_iff
+      (S := S) (β := β) (a := p) (b := 1)).1 hdiv' with ⟨s, hs, hps⟩
     exact havoid s hs (by simpa using hps)
   · intro x y hxy
-    obtain ⟨a, s, hs, rfl⟩ := Localization.surj (S := S) x
-    obtain ⟨b, t, ht, rfl⟩ := Localization.surj (S := S) y
+    obtain ⟨a, s, hs, rfl⟩ := NagataFactoriality.IsLocalization.surj (S := S) (β := β) x
+    obtain ⟨b, t, ht, rfl⟩ := NagataFactoriality.IsLocalization.surj (S := S) (β := β) y
     have hprod : p * (s * t) = a * b := by
       have hEq :
-          Localization.of (S := S) p =
-            Localization.mk (S := S) (a * b) (s * t) (S.mul_mem hs ht) := by
-        simpa [Localization.mk_mul_mk] using hxy
+          algebraMap α β p =
+            _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := by
+        calc
+          algebraMap α β p =
+              _root_.IsLocalization.mk' β a ⟨s, hs⟩ * _root_.IsLocalization.mk' β b ⟨t, ht⟩ := hxy
+          _ = _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := by
+              simpa using (_root_.IsLocalization.mk'_mul
+                (M := S) (S := β) a b ⟨s, hs⟩ ⟨t, ht⟩).symm
       have hEq' :
-          Localization.mk (S := S) p 1 S.one_mem =
-            Localization.mk (S := S) (a * b) (s * t) (S.mul_mem hs ht) := by
-        simpa [Localization.of] using hEq
+          _root_.IsLocalization.mk' β p ⟨1, S.one_mem⟩ =
+            _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := by
+        calc
+          _root_.IsLocalization.mk' β p ⟨1, S.one_mem⟩ = algebraMap α β p := by
+            simpa using (_root_.IsLocalization.mk'_one (S := β) p)
+          _ = _root_.IsLocalization.mk' β (a * b) ⟨s * t, S.mul_mem hs ht⟩ := hEq
       simpa [mul_one] using
-        (Localization.mk_eq_iff (S := S) (hs := S.one_mem) (ht := S.mul_mem hs ht)).1 hEq'
+        (NagataFactoriality.IsLocalization.mk'_eq_iff
+          (S := S) (β := β) (a := p) (b := a * b)
+          (s := 1) (t := s * t) S.one_mem (S.mul_mem hs ht)).1 hEq'
     rcases hS (s * t) (S.mul_mem hs ht) with hstPrime | hstUnit
     · have hstdiv : s * t ∣ a * b := by
         refine ⟨p, ?_⟩
@@ -398,20 +469,31 @@ theorem localization_irreducible_of_irreducible {α : Type*} [CommRing α] [IsDo
             _ = (s * t) * (d * b) := by ac_rfl
         rcases hp.isUnit_or_isUnit hp_eq with hdUnit | hbUnit
         · left
-          have hx_eq : Localization.mk (S := S) a s hs = Localization.of (S := S) (t * d) := by
-            apply (Localization.mk_eq_iff (S := S) (hs := hs) (ht := S.one_mem)).2
+          have hx_eq_mk :
+              _root_.IsLocalization.mk' β a ⟨s, hs⟩ =
+                _root_.IsLocalization.mk' β (t * d) ⟨1, S.one_mem⟩ := by
+            apply (NagataFactoriality.IsLocalization.mk'_eq_iff
+              (S := S) (β := β) (a := a) (b := t * d)
+              (s := s) (t := 1) hs S.one_mem).2
             calc
               a * 1 = a := by simp
               _ = s * t * d := by rw [hd]
               _ = (t * d) * s := by ac_rfl
+          have hx_eq : _root_.IsLocalization.mk' β a ⟨s, hs⟩ = algebraMap α β (t * d) := by
+            calc
+              _root_.IsLocalization.mk' β a ⟨s, hs⟩ =
+                  _root_.IsLocalization.mk' β (t * d) ⟨1, S.one_mem⟩ := hx_eq_mk
+              _ = algebraMap α β (t * d) := by
+                  simpa using (_root_.IsLocalization.mk'_one (S := β) (t * d))
           rw [hx_eq]
-          have htUnitLoc : IsUnit (Localization.of (S := S) t) :=
-            Localization.isUnit_of_mem (S := S) ht
-          have hdUnitLoc : IsUnit (Localization.of (S := S) d) :=
-            Localization.isUnit_of_isUnit (S := S) hdUnit
-          simpa [Localization.of_mul] using isUnit_mul htUnitLoc hdUnitLoc
+          have htUnitLoc : IsUnit (algebraMap α β t) :=
+            NagataFactoriality.IsLocalization.isUnit_map_of_mem (S := S) (β := β) ht
+          have hdUnitLoc : IsUnit (algebraMap α β d) :=
+            NagataFactoriality.IsLocalization.isUnit_map_of_isUnit (β := β) hdUnit
+          simpa [map_mul] using isUnit_mul htUnitLoc hdUnitLoc
         · right
-          exact Localization.isUnit_mk_of_isUnit (S := S) hbUnit ht
+          exact NagataFactoriality.IsLocalization.isUnit_mk'_of_isUnit
+            (S := S) (β := β) hbUnit ht
       · rcases hdivb with ⟨d, hd⟩
         have hst0 : s * t ≠ 0 := hstPrime.ne_zero
         have hp_eq : p = a * d := by
@@ -423,32 +505,57 @@ theorem localization_irreducible_of_irreducible {α : Type*} [CommRing α] [IsDo
             _ = (s * t) * (a * d) := by ac_rfl
         rcases hp.isUnit_or_isUnit hp_eq with haUnit | hdUnit
         · left
-          exact Localization.isUnit_mk_of_isUnit (S := S) haUnit hs
+          exact NagataFactoriality.IsLocalization.isUnit_mk'_of_isUnit
+            (S := S) (β := β) haUnit hs
         · right
-          have hy_eq : Localization.mk (S := S) b t ht = Localization.of (S := S) (s * d) := by
-            apply (Localization.mk_eq_iff (S := S) (hs := ht) (ht := S.one_mem)).2
+          have hy_eq_mk :
+              _root_.IsLocalization.mk' β b ⟨t, ht⟩ =
+                _root_.IsLocalization.mk' β (s * d) ⟨1, S.one_mem⟩ := by
+            apply (NagataFactoriality.IsLocalization.mk'_eq_iff
+              (S := S) (β := β) (a := b) (b := s * d)
+              (s := t) (t := 1) ht S.one_mem).2
             calc
               b * 1 = b := by simp
               _ = s * t * d := by rw [hd]
               _ = (s * d) * t := by ac_rfl
+          have hy_eq : _root_.IsLocalization.mk' β b ⟨t, ht⟩ = algebraMap α β (s * d) := by
+            calc
+              _root_.IsLocalization.mk' β b ⟨t, ht⟩ =
+                  _root_.IsLocalization.mk' β (s * d) ⟨1, S.one_mem⟩ := hy_eq_mk
+              _ = algebraMap α β (s * d) := by
+                  simpa using (_root_.IsLocalization.mk'_one (S := β) (s * d))
           rw [hy_eq]
-          have hsUnitLoc : IsUnit (Localization.of (S := S) s) :=
-            Localization.isUnit_of_mem (S := S) hs
-          have hdUnitLoc : IsUnit (Localization.of (S := S) d) :=
-            Localization.isUnit_of_isUnit (S := S) hdUnit
-          simpa [Localization.of_mul] using isUnit_mul hsUnitLoc hdUnitLoc
+          have hsUnitLoc : IsUnit (algebraMap α β s) :=
+            NagataFactoriality.IsLocalization.isUnit_map_of_mem (S := S) (β := β) hs
+          have hdUnitLoc : IsUnit (algebraMap α β d) :=
+            NagataFactoriality.IsLocalization.isUnit_map_of_isUnit (β := β) hdUnit
+          simpa [map_mul] using isUnit_mul hsUnitLoc hdUnitLoc
     · have hassoc : Associated p (a * b) := by
         simpa [hprod] using associated_mul_unit_right p (s * t) hstUnit
       have habIrred : Irreducible (a * b) := hassoc.irreducible hp
       exact (habIrred.isUnit_or_isUnit rfl).elim
-        (fun haUnit => Or.inl (Localization.isUnit_mk_of_isUnit (S := S) haUnit hs))
-        (fun hbUnit => Or.inr (Localization.isUnit_mk_of_isUnit (S := S) hbUnit ht))
+        (fun haUnit => Or.inl <|
+          NagataFactoriality.IsLocalization.isUnit_mk'_of_isUnit (S := S) (β := β) haUnit hs)
+        (fun hbUnit => Or.inr <|
+          NagataFactoriality.IsLocalization.isUnit_mk'_of_isUnit (S := S) (β := β) hbUnit ht)
 
-theorem dvd_of_localization_dvd {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
-    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p a : α} (hp : Irreducible p) (havoid : Avoids S p)
-    (hdiv : Localization.of (S := S) p ∣ Localization.of (S := S) a) : p ∣ a := by
+theorem localization_irreducible_of_irreducible {α : Type*} [CommRing α] [IsDomain α]
+    {S : Submonoid α} (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α} (hp : Irreducible p)
+    (havoid : Avoids S p) : Irreducible (Localization.of (S := S) p) := by
   letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
-  rcases (Localization.dvd_of_iff (S := S) (a := p) (b := a)).1 hdiv with ⟨s, hs, hsa⟩
+  letI : IsDomain (Localization S) := by infer_instance
+  simpa [Localization.of] using
+    (localization_irreducible_of_irreducible_isLocalization
+      (β := Localization S) (S := S) hS hp havoid)
+
+theorem dvd_of_localization_dvd_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p a : α}
+    (hp : Irreducible p) (havoid : Avoids S p) (hdiv : algebraMap α β p ∣ algebraMap α β a) :
+    p ∣ a := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
+  rcases (NagataFactoriality.IsLocalization.dvd_map_iff
+    (S := S) (β := β) (a := p) (b := a)).1 hdiv with ⟨s, hs, hsa⟩
   rcases hsa with ⟨c, hc⟩
   rcases hS s hs with hsPrime | hsUnit
   · have hsdiv : s ∣ p * c := ⟨a, hc.symm⟩
@@ -472,21 +579,59 @@ theorem dvd_of_localization_dvd {α : Type*} [CommRing α] [IsDomain α] {S : Su
       _ = (↑u⁻¹ : α) * (p * c) := by rw [hc]
       _ = p * ((↑u⁻¹ : α) * c) := by ac_rfl
 
+theorem dvd_of_localization_dvd {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
+    (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p a : α} (hp : Irreducible p) (havoid : Avoids S p)
+    (hdiv : Localization.of (S := S) p ∣ Localization.of (S := S) a) : p ∣ a := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
+  letI : IsDomain (Localization S) := by infer_instance
+  simpa [Localization.of] using
+    (dvd_of_localization_dvd_isLocalization
+      (β := Localization S) (S := S) hS hp havoid hdiv)
+
+theorem prime_of_localization_prime_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α}
+    (hp : Irreducible p) (havoid : Avoids S p) (hploc : Prime (algebraMap α β p)) : Prime p := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
+  refine ⟨hp.ne_zero, hp.not_isUnit, ?_⟩
+  intro a b hdiv
+  have hlocdiv : algebraMap α β p ∣ algebraMap α β (a * b) := by
+    rcases hdiv with ⟨c, hc⟩
+    exact ⟨algebraMap α β c, by simp [map_mul, hc]⟩
+  rcases hploc.2.2 (algebraMap α β a) (algebraMap α β b)
+      (by simpa [map_mul] using hlocdiv) with hpa | hpb
+  · left
+    exact dvd_of_localization_dvd_isLocalization (β := β) (S := S) hS hp havoid hpa
+  · right
+    exact dvd_of_localization_dvd_isLocalization (β := β) (S := S) hS hp havoid hpb
+
 theorem prime_of_localization_prime {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
     (hS : ∀ s ∈ S, Prime s ∨ IsUnit s) {p : α} (hp : Irreducible p) (havoid : Avoids S p)
     (hploc : Prime (Localization.of (S := S) p)) : Prime p := by
   letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
-  refine ⟨hp.ne_zero, hp.not_isUnit, ?_⟩
-  intro a b hdiv
-  have hlocdiv : Localization.of (S := S) p ∣ Localization.of (S := S) (a * b) := by
-    rcases hdiv with ⟨c, hc⟩
-    exact ⟨Localization.of (S := S) c, by simp [hc, Localization.of_mul]⟩
-  rcases hploc.2.2 (Localization.of (S := S) a) (Localization.of (S := S) b)
-      (by simpa [Localization.of_mul] using hlocdiv) with hpa | hpb
-  · left
-    exact dvd_of_localization_dvd hS hp havoid hpa
-  · right
-    exact dvd_of_localization_dvd hS hp havoid hpb
+  letI : IsDomain (Localization S) := by infer_instance
+  simpa [Localization.of] using
+    (prime_of_localization_prime_isLocalization
+      (β := Localization S) (S := S) hS hp havoid hploc)
+
+theorem nagata_key_lemma_isLocalization {α β : Type*}
+    [CommRing α] [IsDomain α] {S : Submonoid α} [CommRing β] [Algebra α β] [IsDomain β]
+    [_root_.IsLocalization S β] (hS : ∀ s ∈ S, Prime s ∨ IsUnit s)
+    [UniqueFactorizationMonoid β] {p : α} (hp : Irreducible p) : Prime p := by
+  letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
+  by_cases hmem : ∃ s : α, s ∈ S ∧ p ∣ s
+  · rcases hmem with ⟨s, hs, hdiv⟩
+    exact prime_of_irreducible_of_dvd_mem hS hp hs hdiv
+  · have havoid : Avoids S p := by
+      intro s hs hdiv
+      exact hmem ⟨s, hs, hdiv⟩
+    have hlocIrred : Irreducible (algebraMap α β p) :=
+      localization_irreducible_of_irreducible_isLocalization
+        (β := β) (S := S) hS hp havoid
+    have hlocPrime : Prime (algebraMap α β p) :=
+      (UniqueFactorizationMonoid.irreducible_iff_prime).mp hlocIrred
+    exact prime_of_localization_prime_isLocalization
+      (β := β) (S := S) hS hp havoid hlocPrime
 
 theorem nagata_key_lemma {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid α}
     (hS : ∀ s ∈ S, Prime s ∨ IsUnit s)
@@ -497,17 +642,10 @@ theorem nagata_key_lemma {α : Type*} [CommRing α] [IsDomain α] {S : Submonoid
           infer_instance))
     {p : α} (hp : Irreducible p) : Prime p := by
   letI : Fact ((0 : α) ∉ S) := submonoidZeroNotMemFact hS
-  by_cases hmem : ∃ s : α, s ∈ S ∧ p ∣ s
-  · rcases hmem with ⟨s, hs, hdiv⟩
-    exact prime_of_irreducible_of_dvd_mem hS hp hs hdiv
-  · have havoid : Avoids S p := by
-      intro s hs hdiv
-      exact hmem ⟨s, hs, hdiv⟩
-    have hlocIrred : Irreducible (Localization.of (S := S) p) :=
-      localization_irreducible_of_irreducible hS hp havoid
-    letI : UniqueFactorizationMonoid (Localization S) := hUFD
-    have hlocPrime : Prime (Localization.of (S := S) p) :=
-      (UniqueFactorizationMonoid.irreducible_iff_prime).mp hlocIrred
-    exact prime_of_localization_prime hS hp havoid hlocPrime
+  letI : IsDomain (Localization S) := by infer_instance
+  letI : UniqueFactorizationMonoid (Localization S) := hUFD
+  simpa [Localization.of] using
+    (nagata_key_lemma_isLocalization
+      (β := Localization S) (S := S) hS hp)
 
 end NagataFactoriality

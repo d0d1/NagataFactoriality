@@ -5,8 +5,17 @@ type: software
 license: Apache-2.0
 authors:
   - family-names: Ramos
-    given-names: Arthur Freitas
+    given-names: Arthur F.
     email: arfreita@microsoft.com
+    affiliation: Microsoft, USA
+  - family-names: de Queiroz
+    given-names: Ruy J. G. B.
+    email: ruy@cin.ufpe.br
+    affiliation: Centro de Informatica, Universidade Federal de Pernambuco, Brazil
+  - family-names: de Oliveira
+    given-names: Anjolina G.
+    email: ago@cin.ufpe.br
+    affiliation: Centro de Informatica, Universidade Federal de Pernambuco, Brazil
 repository-code: "https://github.com/Arthur742Ramos/NagataFactoriality"
 abstract: >-
   A Lean 4 / Mathlib formalization project centered on Nagata's factoriality

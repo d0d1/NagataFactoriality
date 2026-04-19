@@ -1,0 +1,199 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/base\size11.clo))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\lmodern.sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.st
+y
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty)
+ (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cf
+g))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+ (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+ (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty)
+)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.st
+y))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amscls\amsthm.sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.
+sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype-
+pdftex.def)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\microtype.
+cfg))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.st
+y
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.
+sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdef
+inekeys.sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescap
+e.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexc
+mds.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarer
+r.sty)))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\get
+titlestring.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.
+sty)))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringen
+c.sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintc
+alc.sty)))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerun
+filecheck.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniq
+uecounter.sty)))
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.st
+y
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstpatch.st
+y)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty
+)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cf
+g))
+==> First Aid for listings.sty no longer applied!
+    Expected:
+        2024/09/23 1.10c (Carsten Heinz)
+    but found:
+        2025/11/14 1.11b (Carsten Heinz)
+    so I'm assuming it got fixed.
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.c
+fg)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.
+def)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.l
+tx)) (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmr.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-
+pdftex.def) (main.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-cmr.cfg
+) (main.out) (main.out)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf
+.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\ot1lmr.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\omllmm.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\omslmsy.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\omxlmex.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msa.cfg
+) (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/microtype\mt-msb.cfg
+) (C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\ts1lmr.fd)
+(C:\Users\arfreita\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmtt.fd)
+[1{C:/Users/arfreita/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users
+/arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}{C:/Users/
+arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}{C:/Users/
+arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathit.enc}{C:/Use
+rs/arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathsy.enc}{C:/
+Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-rm.enc}]
+[2] [3]
+Underfull \hbox (badness 3229) in paragraph at lines 358--360
+[]\T1/lmtt/m/n/10.95 nagata_theorem_of_finite_prime_generators \T1/lmr/m/n/10.9
+5 (+20) cov-ers the es-pe-cially com-mon finite-
+[4{C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathex
+.enc}] [5] [6]
+Underfull \hbox (badness 10000) in paragraph at lines 561--562
+[]\T1/lmtt/m/n/10 dvd_of_localization_dvd_
+
+Underfull \hbox (badness 10000) in paragraph at lines 563--564
+[]\T1/lmtt/m/n/10 localization_irreducible_
+
+Underfull \hbox (badness 10000) in paragraph at lines 564--564
+[]\T1/lmtt/m/n/10 localization_irreducible_
+
+Underfull \hbox (badness 10000) in paragraph at lines 565--566
+[]\T1/lmtt/m/n/10 prime_of_localization_prime_
+[7]
+Overfull \hbox (19.38037pt too wide) in paragraph at lines 649--657
+[]\T1/lmr/m/n/10.95 (-20) The file also in-cludes ex-plicit proofs of fac-tor-i
+za-tion unique-ness. The the-o-rem \T1/lmtt/m/n/10.95 factorization_unique
+[8]
+Underfull \hbox (badness 1648) in paragraph at lines 765--773
+\T1/lmr/m/n/10.95 (+20) u-ally: the in-ter-me-di-ate lemma \T1/lmtt/m/n/10.95 p
+rimeGenerated_closure_of_primes \T1/lmr/m/n/10.95 (+20) han-dles the clo-sure
+
+Underfull \hbox (badness 2237) in paragraph at lines 765--773
+\T1/lmr/m/n/10.95 (+20) ar-gu-ment in-ter-nally. The com-pat-i-bil-ity names \T
+1/lmtt/m/n/10.95 nagata_theorem_of_prime_or_unit \T1/lmr/m/n/10.95 (+20) and
+[9] [10]
+Underfull \hbox (badness 10000) in paragraph at lines 869--870
+[]\T1/lmr/m/n/10.95 (+20) Divisibility, as-so-ci-at-ed-ness, prime--
+
+Underfull \hbox (badness 1895) in paragraph at lines 893--894
+[]\T1/lmr/m/n/10.95 (+20) Laurent-polynomial route and iterated-
+[11] [12] [13] [14] [15] [16]
+Overfull \hbox (64.66148pt too wide) in paragraph at lines 1321--1328
+[]\T1/lmr/m/n/10.95 (-20) The re-sult-ing ar-chi-tec-ture is gen-uinely mixed r
+ather than wrapper-only: \T1/lmtt/m/n/10.95 Localization/IsLocalization.lean
+[17]
+Overfull \hbox (5.64627pt too wide) in paragraph at lines 1341--1345
+[]\T1/lmr/bx/n/10.95 (-20) Typeclass di-a-monds. \T1/lmr/m/n/10.95 (-20) The \T
+1/lmtt/m/n/10.95 Localization \T1/lmr/m/n/10.95 (-20) type car-ries mul-ti-ple 
+paths to \T1/lmtt/m/n/10.95 CommMonoidWithZero\T1/lmr/m/n/10.95 (-20) ,
+[18] [19] [20] [21] [22] [23] (main.aux) )
+(see the transcript file for additional information)<C:/Users/arfreita/AppData/
+Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Users/arfreita/AppDa
+ta/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/arfreita/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmex10.pfb><C:/Users/arfreita
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi10.pfb><C:/Users/arfre
+ita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Users/arf
+reita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/a
+rfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users
+/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C:/Use
+rs/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr6.pfb><C:/Us
+ers/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr7.pfb><C:/U
+sers/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/
+Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr9.pfb><C:
+/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmri10.pfb>
+<C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy10.p
+fb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy7
+.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lms
+y8.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/l
+mtk10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/public/l
+m/lmtt10.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/publi
+c/lm/lmtt12.pfb><C:/Users/arfreita/AppData/Local/Programs/MiKTeX/fonts/type1/pu
+blic/amsfonts/symbols/msbm10.pfb>
+Output written on main.pdf (23 pages, 537598 bytes).
+Transcript written on main.log.

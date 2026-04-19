@@ -1,1 +1,2 @@
 import NagataFactoriality.Localization.Localization
+import NagataFactoriality.Localization.IsLocalization

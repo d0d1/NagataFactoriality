@@ -1,3 +1,4 @@
 import NagataFactoriality.Localization.MultSet
 import NagataFactoriality.Localization.Localization
+import NagataFactoriality.Localization.IsLocalization
 import NagataFactoriality.Localization.Properties

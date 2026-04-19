@@ -1,0 +1,35 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{isabelle,isabellesym}
+\usepackage{pdfsetup}
+
+\urlstyle{rm}
+\isabellestyle{it}
+
+\begin{document}
+
+\title{Nagata Factoriality}
+\author{Arthur Freitas Ramos}
+\maketitle
+
+\begin{abstract}
+  This entry provides an AFP-style Isabelle/HOL formalization of a
+  prime-generated version of Nagata's factoriality theorem.  It develops the
+  prime-generated multiplicative-set infrastructure, packages a wrapper layer
+  over the AFP localization entry \texttt{Localization\_Ring}, and proves
+  record-based descent theorems showing that factoriality descends from a
+  localization to the base ring under either a prime-generated or a
+  prime-or-unit hypothesis on the multiplicative set.  The current application
+  layer also includes an abstract polynomial theorem for localization away the
+  polynomial variable \(X\), isolating the Laurent-polynomial route followed in
+  the companion Lean development.
+\end{abstract}
+
+\tableofcontents
+
+\input{session}
+
+\bibliographystyle{abbrv}
+\bibliography{root}
+
+\end{document}

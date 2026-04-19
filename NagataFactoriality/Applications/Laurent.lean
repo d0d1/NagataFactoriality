@@ -90,14 +90,9 @@ theorem polynomial_uniqueFactorizationMonoid_of_laurent {R : Type*} [CommRing R]
   let S : Submonoid R[X] := Submonoid.powers X
   have hS : PrimeGenerated S := by
     simpa [S] using (primeGenerated_powers (p := (X : R[X])) (polynomial_prime_X (R := R)))
-  letI : Fact ((0 : R[X]) ∉ S) := ⟨zero_notMem_of_primeGenerated hS⟩
-  letI : IsLocalization.Away (X : R[X]) R[T;T⁻¹] := laurentPolynomial_isLocalization R
-  let e : R[T;T⁻¹] ≃* Localization S :=
-    (IsLocalization.algEquiv S (Localization S) R[T;T⁻¹]).toRingEquiv.toMulEquiv.symm
-  have hUFDLoc : UniqueFactorizationMonoid (Localization S) := by
-    exact MulEquiv.uniqueFactorizationMonoid e
-      (inferInstance : UniqueFactorizationMonoid R[T;T⁻¹])
-  exact nagata_theorem (R := R[X]) S hS hUFDLoc
+  letI : _root_.IsLocalization S R[T;T⁻¹] := by
+    simpa [S] using (laurentPolynomial_isLocalization R : _root_.IsLocalization.Away (X : R[X]) R[T;T⁻¹])
+  exact nagata_theorem_isLocalization (R := R[X]) (T := R[T;T⁻¹]) S hS inferInstance
 
 theorem polynomial_uniqueFactorizationMonoid_via_nagata {R : Type*} [CommRing R] [IsDomain R]
     [IsNoetherianRing R] [UniqueFactorizationMonoid R] : UniqueFactorizationMonoid R[X] := by

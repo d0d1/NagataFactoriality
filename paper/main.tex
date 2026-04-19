@@ -4,10 +4,12 @@
 %  Prepared for submission to the Annals of Formalized Mathematics.
 % ==========================================================================
 
+\pdfoutput=1
 \documentclass[11pt]{article}
 
 % ── Fonts and encoding ────────────────────────────────────────────────────
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 
 % ── Page layout ───────────────────────────────────────────────────────────
@@ -65,14 +67,26 @@
 % Inline Lean identifier.  \texorpdfstring gives clean PDF bookmarks.
 \newcommand{\li}[1]{\texorpdfstring{\texttt{#1}}{#1}}
 % Lean file path.
-\newcommand{\lf}[1]{\texorpdfstring{\texttt{#1}}{#1}}
+\newcommand{\lf}[1]{\texorpdfstring{\nolinkurl{#1}}{#1}}
 % Short DOI helper.
 \newcommand{\doi}[1]{\url{https://doi.org/#1}}
 
 % ── Title ────────────────────────────────────────────────────────────────
 \title{A Prime-Generated Formalization of Nagata's\\
        Factoriality Theorem in Lean~4}
-\author{Arthur Freitas Ramos}
+\author{
+Arthur F.~Ramos\thanks{Corresponding author.}\\
+Microsoft, USA\\
+\texttt{arfreita@microsoft.com}
+\and
+Ruy J.~G.~B.~de~Queiroz\\
+Centro de Inform\'atica, Universidade Federal de Pernambuco, Brazil\\
+\texttt{ruy@cin.ufpe.br}
+\and
+Anjolina G.~de~Oliveira\\
+Centro de Inform\'atica, Universidade Federal de Pernambuco, Brazil\\
+\texttt{ago@cin.ufpe.br}
+}
 \date{}
 
 % ======================================================================= %
@@ -84,17 +98,27 @@
 % ───────────────────────────────────────────────────────────────────────────
 
 \begin{abstract}
-We present a Lean~4\,/\,Mathlib formalization of Nagata's factoriality
-theorem: if~$R$ is a noetherian domain and $S\subseteq R$ is a
-\emph{prime-generated} submonoid such that $S^{-1}R$ is a UFD, then~$R$
-itself is a UFD.  The prime-generated hypothesis---every element of~$S$ is a
-finite product of primes belonging to~$S$---replaces a superficially cleaner
-but degenerate ``prime-or-unit'' condition that the formalization effort
-exposed.  As an application, we prove that $R[X]$ is a UFD whenever~$R$ is a
-noetherian UFD, via a Laurent-polynomial localization and the formalized
-Nagata theorem.  No public formalization of this result is known to us in
-Lean, Coq, or Isabelle.
+We present, to our knowledge, the first public Lean~4\,/\,Mathlib
+formalization of Nagata's factoriality theorem: if~$R$ is a noetherian domain
+and $S\subseteq R$ is a prime-generated submonoid such that $S^{-1}R$ is a
+UFD, then~$R$ is a UFD.  The development is organized around reusable transfer
+lemmas and packages the theorem both for the concrete type
+\li{Localization\,S} and at the abstract \li{IsLocalization} level.  As
+applications, we formalize two structurally distinct Nagata-based proofs that
+$R[X]$ is a UFD whenever~$R$ is a noetherian UFD: one via Laurent-polynomial
+localization at powers of~$X$, and one via localization at the constant primes
+and comparison with~$\operatorname{Frac}(R)[X]$.  The formalization also
+replaces a degenerate ``prime-or-unit'' variant by the mathematically correct
+prime-generated hypothesis exposed by the proof effort, and it yields the
+iterated polynomial corollary $R[X][Y]$.
 \end{abstract}
+
+\paragraph{Keywords.}
+Formalized mathematics, Lean~4, Mathlib, commutative algebra, localization,
+unique factorization domains, Nagata's theorem.
+
+\paragraph{MSC2020.}
+Primary 03B35; Secondary 13A05, 13B30.
 
 
 % ======================================================================= %
@@ -139,33 +163,31 @@ across the localization map---exactly the kind of multi-step reasoning where
 formalization provides high assurance.  Moreover, its immediate corollary for
 polynomial rings makes it a practically useful building block.
 
-An earlier version of this project stated the main result under the hypothesis
-that every element of the multiplicative set~$S$ is prime or a unit---a
-condition that is superficially clean but essentially degenerate for any
-submonoid with more than one non-unit prime generator.  The present development
-replaces that restricted statement with a \emph{prime-generated} hypothesis and
-rebuilds the supporting machinery around the corrected formulation.  We discuss
-the mathematical reasons in Section~\ref{sec:background} and the way the
-formalization surfaced the problem in Section~\ref{sec:lessons}.
+During the formalization we found that an earlier prime-or-unit version of the
+statement collapses for submonoids with more than one non-unit prime
+generator.  The present development therefore adopts the mathematically correct
+\emph{prime-generated} hypothesis and rebuilds the supporting machinery around
+that formulation.  Section~\ref{sec:background} explains the algebraic issue,
+and Section~\ref{sec:lessons} returns to the proof-engineering lesson.
 
 \paragraph{Contributions.}
-The formal contribution is threefold:
+The main contributions are:
 \begin{enumerate}[nosep]
-\item A formalization of Nagata's factoriality theorem under a prime-generated
-  hypothesis on the multiplicative set~(\S\ref{sec:statement}).
-\item Conditional transfer lemmas for divisibility, irreducibility, and
-  primality between a noetherian domain and its
-  localization~(\S\ref{sec:architecture}).
-\item Two theorem-driven applications: if~$R$ is a noetherian UFD then both
-  $R[X]$ and $R[X][Y]$ are UFDs, obtained via a Laurent-polynomial
-  localization and repeated use of the formalized Nagata theorem
+\item To the best of our knowledge, the first public formalization of Nagata's
+  factoriality theorem, stated under the correct prime-generated hypothesis on
+  the multiplicative set~(\S\ref{sec:statement}).
+\item A reusable theorem surface that combines concrete
+  \li{Localization\,S} statements, abstract \li{IsLocalization} formulations,
+  and packaged entry points for prime-generator closures
+  ~(\S\ref{sec:statement}).
+\item Two structurally distinct Nagata-based routes to the polynomial UFD
+  theorem---via Laurent localization and via the fraction field---together with
+  an iterated polynomial corollary obtained by reusing the same package
   ~(\S\ref{sec:application}).
 \end{enumerate}
-Beyond these formal artifacts, the project contributes a case study in the
-interaction between formalization and mathematical hypothesis design: the
-failure of the initial prime-or-unit formulation was a genuine mathematical
-deficiency that the formal setting made visible earlier and more sharply than a
-textbook exposition might.
+The development also shows how formalization can sharpen hypothesis design: the
+shift from prime-or-unit to prime-generated was not cosmetic, but required to
+state the theorem at the right level of generality.
 
 \paragraph{Outline.}
 Section~\ref{sec:background} reviews the mathematical background.
@@ -623,7 +645,7 @@ a UFD---is recorded as \li{prime\_iff\_irreducible\_of\_ufd}, completing the
 loop that the Nagata argument exploits in Case~2 of the key lemma.
 
 The file also includes explicit proofs of factorization uniqueness.
-The theorem \li{factorization\_unique} shows that two factorizations
+The theorem \li{factorization\_\allowbreak{}unique} shows that two factorizations
 of the same element into irreducibles are related by a bijection
 that pairs associate elements.  This result is not needed for
 the Nagata argument itself---it only establishes the \emph{existence}
@@ -683,6 +705,25 @@ first registers $0\notin S$ as a \li{Fact} and then invokes typeclass
 inference.  We elide this block as ``$\langle\cdots\rangle$'' in the listings
 below for readability; the full text is in the artifact.
 
+The abstract front-end is:
+
+\begin{lstlisting}[style=lean]
+theorem nagata_theorem_isLocalization
+    {R T : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    (S : Submonoid R) [CommRing T] [Algebra R T]
+    [IsLocalization S T] [CancelCommMonoidWithZero T]
+    (hS : PrimeGenerated S) (hUFD : UniqueFactorizationMonoid T) :
+    UniqueFactorizationMonoid R
+\end{lstlisting}
+
+\noindent
+The proof core still descends through the concrete localization
+\li{Localization\,S}, but this wrapper lets downstream applications work with
+any ring already known to be an \li{IsLocalization} of~$R$ at~$S$.  The UFD
+structure is transported along \li{IsLocalization.algEquiv}, so the abstraction
+boundary is isolated in the theorem surface rather than duplicated throughout
+the transfer lemmas.
+
 The prime-generator packaging family:
 
 \begin{lstlisting}[style=lean]
@@ -693,11 +734,29 @@ theorem nagata_theorem_of_prime_generators
               (Localization (Submonoid.closure s)) $\langle\cdots\rangle$) :
     UniqueFactorizationMonoid R
 
+theorem nagata_theorem_of_prime_generators_isLocalization
+    {R T : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    (s : Set R) [CommRing T] [Algebra R T]
+    [IsLocalization (Submonoid.closure s) T]
+    [CancelCommMonoidWithZero T]
+    (hs : $\forall$ q $\in$ s, Prime q)
+    (hUFD : UniqueFactorizationMonoid T) :
+    UniqueFactorizationMonoid R
+
 theorem nagata_theorem_of_finite_prime_generators
     {R : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
     (s : Finset R) (hs : $\forall$ q $\in$ s, Prime q)
     (hUFD : @UniqueFactorizationMonoid
               (Localization (Submonoid.closure ($\uparrow$s : Set R))) $\langle\cdots\rangle$) :
+    UniqueFactorizationMonoid R
+
+theorem nagata_theorem_of_finite_prime_generators_isLocalization
+    {R T : Type*} [CommRing R] [IsDomain R] [IsNoetherianRing R]
+    (s : Finset R) [CommRing T] [Algebra R T]
+    [IsLocalization (Submonoid.closure ($\uparrow$s : Set R)) T]
+    [CancelCommMonoidWithZero T]
+    (hs : $\forall$ q $\in$ s, Prime q)
+    (hUFD : UniqueFactorizationMonoid T) :
     UniqueFactorizationMonoid R
 \end{lstlisting}
 
@@ -705,7 +764,10 @@ theorem nagata_theorem_of_finite_prime_generators
 These entry points relieve the user from constructing the
 \li{PrimeGenerated} witness manually: the intermediate lemma
 \li{primeGenerated\_closure\_of\_primes} handles the closure argument
-internally.
+internally.  The compatibility names
+\li{nagata\_theorem\_of\_prime\_or\_unit} and
+\li{nagata\_theorem\_of\_prime\_or\_unit\_isLocalization} remain available for
+the restricted legacy hypothesis.
 
 \subsection{Key transfer lemmas}
 
@@ -761,6 +823,11 @@ theorem polynomial_uniqueFactorizationMonoid_via_nagata
     [IsNoetherianRing R] [UniqueFactorizationMonoid R] :
     UniqueFactorizationMonoid R[X]
 
+theorem polynomial_uniqueFactorizationMonoid_via_fractionField
+    {R : Type*} [CommRing R] [IsDomain R]
+    [UniqueFactorizationMonoid R] [IsNoetherianRing R] :
+    UniqueFactorizationMonoid R[X]
+
 theorem iterated_polynomial_uniqueFactorizationMonoid_via_nagata
     {R : Type*} [CommRing R] [IsDomain R]
     [IsNoetherianRing R] [UniqueFactorizationMonoid R] :
@@ -770,7 +837,10 @@ theorem iterated_polynomial_uniqueFactorizationMonoid_via_nagata
 \noindent
 The third theorem is the basic composite: from a noetherian UFD~$R$, it first
 constructs the Laurent UFD instance and then descends via the Nagata theorem
-to obtain a UFD instance on~$R[X]$.  The fourth theorem simply iterates that
+to obtain a UFD instance on~$R[X]$.  The fourth theorem gives a second
+Nagata-based proof of the same polynomial UFD result by localizing at the
+constant primes and comparing the resulting localization with
+$\operatorname{Frac}(R)[X]$.  The fifth theorem then iterates the Laurent-based
 construction once more, reusing the same package to produce a UFD structure on
 $R[X][Y]$.
 
@@ -805,6 +875,8 @@ Table~\ref{tab:files} summarizes the structure.
   & Submonoid utilities (zero exclusion) \\
   & \texttt{Localization.lean}
   & Localization wrapper API \\
+  & \texttt{IsLocalization.lean}
+  & Helper lemmas for the abstract localization interface \\
   & \texttt{Properties.lean}
   & Re-export hub \\
 \midrule
@@ -812,11 +884,13 @@ Table~\ref{tab:files} summarizes the structure.
   & \texttt{Lemmas.lean}
   & \li{PrimeGenerated}, \li{Avoids}, all transfer lemmas \\
   & \texttt{Theorem.lean}
-  & \li{nagata\_theorem} and variants \\
+  & Concrete and abstract Nagata theorem families \\
 \midrule
 \texttt{Applications/}
   & \texttt{Laurent.lean}
-  & Laurent-polynomial application \\
+  & Laurent-polynomial route and iterated-polynomial corollary \\
+  & \texttt{FractionField.lean}
+  & Fraction-field route to the polynomial UFD theorem \\
   & \texttt{Gauss.lean}
   & Gauss-lemma wrappers \\
   & \texttt{Examples.lean}
@@ -830,13 +904,12 @@ Table~\ref{tab:files} summarizes the structure.
 \paragraph{Concrete localization.}
 Mathlib provides two views of localization: the concrete quotient type
 \li{Localization\,S} and the abstract typeclass \li{IsLocalization}.  Our
-development works primarily with the concrete type, wrapping it in a thin API
-that hides the underlying quotient construction.  The Nagata argument requires
-explicit manipulation of numerators and denominators, and the concrete type
-makes these operations definitionally transparent.  The tradeoff is that the
-results are stated for \li{Localization\,S} rather than for an arbitrary
-\li{IsLocalization} instance, which would require an additional abstraction
-step for Mathlib integration.
+development now uses both directly.  The helper file
+\lf{Localization/IsLocalization.lean} provides the abstract denominator-clearing
+and unit/divisibility interface, and the central transport lemmas in
+\lf{Nagata/Lemmas.lean} are stated for arbitrary \li{IsLocalization} targets.
+The concrete \li{Localization\,S} API remains useful as a canonical target type
+and for the concrete theorem names.
 
 \paragraph{Fact-based zero exclusion.}
 The condition $0\notin S$ is carried as a \li{Fact} instance rather than as an
@@ -900,29 +973,37 @@ explicitly.
 
 \subsection{Dependency structure and size}
 
-Table~\ref{tab:loc} gives a per-file breakdown of the formalization.  The
-dominant module is \lf{Nagata/Lemmas.lean}, which accounts for roughly half the
-total code.  This is expected: the transfer lemmas involve the most intricate
-case analysis and multiset induction in the project.
+Table~\ref{tab:loc} gives a per-file breakdown of all Lean source files in the
+artifact.  The dominant module is \lf{Nagata/Lemmas.lean}, which still accounts
+for the largest share of the code.  This is expected: the transfer lemmas
+involve the most intricate case analysis and multiset induction in the project.
 
 \begin{table}[ht]
 \centering
-\caption{Per-file line counts (non-blank Lean source lines).}\label{tab:loc}
+\caption{Per-file line counts (Lean source lines).}\label{tab:loc}
 \smallskip
 \begin{tabular}{@{}lr@{\quad}lr@{}}
 \toprule
 \textbf{File} & \textbf{Lines} & \textbf{File} & \textbf{Lines} \\
 \midrule
-\texttt{Nagata/Lemmas.lean}           & 489
-  & \texttt{Applications/Laurent.lean}  & 104 \\
-\texttt{Localization/Localization.lean} & 140
-  & \texttt{Basic/UFD.lean}             & 65  \\
-\texttt{Basic/Divisibility.lean}      & 54
-  & \texttt{Nagata/Theorem.lean}        & 54  \\
-\texttt{Localization/MultSet.lean}    & 22
-  & \texttt{Applications/Gauss.lean}    & 15  \\
-\texttt{Basic/Noetherian.lean}        & 11
-  & \texttt{Applications/Examples.lean} & 16  \\
+\texttt{Nagata/Lemmas.lean}             & 651
+  & \texttt{Localization/IsLocalization.lean} & 115 \\
+\texttt{Localization/Localization.lean} & 177
+  & \texttt{Nagata/Theorem.lean}              & 100 \\
+\texttt{Applications/FractionField.lean} & 144
+  & \texttt{Applications/Laurent.lean}        & 109 \\
+\texttt{Basic/UFD.lean}                 & 64
+  & \texttt{Basic/Divisibility.lean}          & 76  \\
+\texttt{Localization/MultSet.lean}      & 30
+  & \texttt{Applications/Examples.lean}       & 23  \\
+\texttt{Applications/Gauss.lean}        & 21
+  & \texttt{Basic/Noetherian.lean}            & 15  \\
+\texttt{Applications.lean}              & 4
+  & \texttt{Basic.lean}                       & 4   \\
+\texttt{Localization.lean}              & 4
+  & \texttt{Basic/Ring.lean}                  & 5   \\
+\texttt{Nagata.lean}                    & 2
+  & \texttt{Localization/Properties.lean}    & 2   \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -937,12 +1018,14 @@ independently once its predecessors are built.
 
 
 % ======================================================================= %
-\section{Applications: polynomial and iterated polynomial rings}\label{sec:application}
+\section{Applications: two Nagata routes to polynomial UFDs}\label{sec:application}
 % ======================================================================= %
 
-The application file \lf{Applications/Laurent.lean} puts the formalized theorem
-to work, proving a textbook result by a route that genuinely depends on the
-Nagata machinery.
+The application layer now contains two Nagata-based routes to the polynomial
+UFD theorem.  The first, in \lf{Applications/Laurent.lean}, localizes at powers
+of the indeterminate.  The second, in \lf{Applications/FractionField.lean},
+localizes at the constant primes and compares with the fraction-field
+polynomial ring.  Both genuinely depend on the formalized Nagata machinery.
 
 \begin{corollary}\label{cor:poly}
 If $R$ is a noetherian UFD, then the polynomial ring $R[X]$ is a UFD.
@@ -994,11 +1077,11 @@ in $R[X,X^{-1}]$ (after absorbing the powers of~$X$ as units).
 
 The theorem \li{polynomial\_uniqueFactorizationMonoid\_of\_laurent} shows that
 if~$R$ is noetherian and $R[X,X^{-1}]$ is a UFD, then $R[X]$ is a UFD.  This
-is a direct invocation of \li{nagata\_theorem} with the submonoid~$S$ from
-Step~1.  The one subtlety is that Mathlib's \li{IsLocalization.Away} structure
-on $R[X,X^{-1}]$ must be transported to a \li{UniqueFactorizationMonoid}
-instance on the abstract \li{Localization\,S}, via a ring equivalence and the
-fact that UFD transfers across multiplicative equivalences.
+is now a direct invocation of the abstract wrapper
+\li{nagata\_theorem\_isLocalization} with the submonoid~$S$ from Step~1.
+Mathlib already supplies an \li{IsLocalization.Away} structure on the Laurent
+polynomial ring, so once the prime-generated witness is in place, the descent
+step is expressed entirely at the abstract localization interface.
 
 \subsection{Step~5: the composite theorem}
 
@@ -1006,7 +1089,36 @@ Finally, \li{polynomial\_uniqueFactorizationMonoid\_via\_nagata} combines
 Steps~3 and~4: given a noetherian UFD~$R$, it constructs the Laurent UFD
 instance and invokes Step~4 to obtain the polynomial UFD instance.
 
-\subsection{A second application: iterated polynomial rings}
+\subsection{A second route: localization at constant primes}
+
+The file \lf{Applications/FractionField.lean} proves the same polynomial UFD
+result by a different Nagata argument.  Let
+\[
+  S = \langle\, C(p) \mid p \in R,\; p \text{ prime}\,\rangle \subseteq R[X]
+\]
+be the submonoid generated by the constant primes.  This submonoid is
+prime-generated by the generic closure lemma
+\li{primeGenerated\_closure\_of\_primes}.
+
+The key new step is to show that every nonzero constant polynomial becomes a
+unit in~$S^{-1}R[X]$.  Since~$R$ is a UFD, every nonzero coefficient factors
+into prime elements, and by construction their constant images already lie
+in~$S$.  It follows that the concrete localization \li{Localization\,S} is also
+an \li{IsLocalization} of~$R[X]$ at the larger submonoid $(R^\circ).\mathrm{map}\,C$
+of nonzero constant polynomials.
+
+Mathlib's theorem \li{Polynomial.isLocalization} identifies
+$\operatorname{Frac}(R)[X]$ as a localization at that larger submonoid.  The
+two localization presentations are compared by \li{IsLocalization.algEquiv},
+which transports the UFD structure from $\operatorname{Frac}(R)[X]$ (a
+polynomial ring over a field) back to~\li{Localization\,S}.  Applying the
+Nagata theorem then yields a second proof of Corollary~\ref{cor:poly}.
+
+This second route is not mathematically stronger than the Laurent argument; its
+value is that it exercises the same Nagata package against a genuinely
+different localization choice.
+
+\subsection{A reuse corollary: iterated polynomial rings}
 
 \begin{corollary}\label{cor:iterpoly}
 If $R$ is a noetherian UFD, then the iterated polynomial ring $R[X][Y]$ is a
@@ -1187,8 +1299,10 @@ The most effective automation patterns in this development were:
 
 Working with Mathlib's localization API involves navigating between the abstract
 \li{IsLocalization} typeclass and concrete \li{Localization} instances.  The
-development stays close to the concrete type for definitional convenience,
-simplifying denominator manipulation at the cost of some generality.
+project uses a two-layer approach: abstract interface lemmas handle
+divisibility, units, and surjectivity uniformly across localization targets,
+while the concrete quotient remains useful when one wants a canonical target
+type with definitional fraction constructors.
 
 A key design choice was the \li{dvd\_of\_iff} lemma, which characterizes
 divisibility of images in the localization:
@@ -1202,26 +1316,30 @@ access the localization: they never manipulate fractions directly, but instead
 use it to translate localization-side divisibility into a ring-side equation
 amenable to multiset induction.
 
-A future Mathlib-oriented refactoring might abstract over the localization
-construction, but for the present theorem the concrete approach proved
-practical.
+The resulting architecture is genuinely mixed rather than wrapper-only.
+\lf{Localization/IsLocalization.lean} provides the abstract API.
+\lf{Nagata/Lemmas.lean} carries the transport chain at the
+\li{IsLocalization} level, and the concrete \li{Localization\,S} theorems are
+recovered as specializations.  This keeps the downstream application files
+short while making the core theorem family available from arbitrary
+localizations.
 
 \subsection{Formalization effort and Lean~4 ergonomics}
 
-The total formalization comprises approximately 976 lines of Lean~4 source
-across 16 files, with 75 formally verified theorem/lemma declarations
-and zero uses of \li{sorry}, \li{admit}, or \li{native\_decide}.  The
-development was carried out over a period of several weeks by a single author
-using Lean~4.24.0 and Mathlib (commit hash recorded in \lf{lean-toolchain} and
-\lf{lake-manifest.json}).
+The current formalization comprises 1546 lines of Lean~4 source across 18
+files, with 97 formally verified theorem/lemma declarations.  It contains zero
+uses of \li{sorry}, \li{admit}, \li{axiom}, or \li{native\_decide}.  The
+development targets Lean~4.24.0 and Mathlib as pinned by
+\lf{lean-toolchain} and \lf{lake-manifest.json}.
 
 Several Lean~4-specific ergonomic issues shaped the proof style:
 
 \begin{itemize}[nosep]
 \item \textbf{Typeclass diamonds.}  The \li{Localization} type carries
-  multiple paths to \li{CommMonoidWithZero}, which occasionally forces the use
-  of explicit \li{@} notation to disambiguate instances.  The theorem statements
-  in Section~\ref{sec:lean-statements} show this pattern.
+  multiple paths to the commutative-monoid-with-zero structure, which
+  occasionally forces the use of explicit \li{@} notation to disambiguate
+  instances.  The theorem statements in Section~\ref{sec:lean-statements} show
+  this pattern.
 \item \textbf{Multiset induction.}  Key transfer lemmas reason by induction on
   the multiset of prime factors.  Lean's \li{Multiset.induction\_on} tactic
   handles the base and cons cases, but the recursive step often requires manual
@@ -1279,9 +1397,9 @@ does not modify it.
 
 In Coq, the Mathematical Components library~\cite{mathcomp} offers a mature
 algebraic environment with strong support for divisibility and polynomial
-algebra, including a Gauss-lemma-based proof that polynomial rings over UFDs
-are UFDs.  The algebraic hierarchy is built on the SSReflect proof style, which
-favors boolean decision procedures over classical logic.
+algebra, including infrastructure for Gauss-lemma-style and UFD-style arguments
+over polynomial rings.  The algebraic hierarchy is built on the SSReflect proof
+style, which favors boolean decision procedures over classical logic.
 
 In Isabelle/HOL, Bordg~\cite{bordg-localization} formalizes localization of
 commutative rings in the Archive of Formal Proofs, providing the
@@ -1334,12 +1452,39 @@ UFD transfer theorem.
 \section{Prospective library contributions}\label{sec:upstream}
 % ======================================================================= %
 
-We classify the results by Mathlib readiness.  The localization
-helpers are directly upstreamable.  The \li{PrimeGenerated} predicate
-and its transfer lemmas are natural candidates once refactored to
-Mathlib's abstract \li{IsLocalization} typeclass.  The Nagata theorem
-itself is the core paper-level contribution; whether it belongs in
-Mathlib depends on community demand.
+We classify the results by Mathlib readiness.  The localization helper API is
+directly upstreamable, and the \li{PrimeGenerated} predicate plus its closure lemmas are natural first
+candidates.  Since the transport chain and theorem family are now formulated at
+the abstract \li{IsLocalization} level, the remaining Mathlib question is
+primarily one of packaging rather than refactoring.
+
+A concrete split would be:
+\begin{enumerate}[nosep]
+\item \textbf{PR1: prime-generated infrastructure.}  Move
+  \li{PrimeGenerated}, \li{Avoids}, the zero-exclusion and powers/closure
+  lemmas, and the multiset bookkeeping that does not depend on localization.
+  In the current artifact, this is the generic portion of
+  \lf{Nagata/Lemmas.lean} together with the supporting lemmas from
+  \lf{Localization/MultSet.lean}.
+\item \textbf{PR2: abstract localization transport API.}  Move the helper
+  localization lemmas together with the abstract divisibility,
+  irreducibility, and primality transport lemmas.  Concretely, this includes
+  the \li{surj}/\li{mk'\_eq\_iff}/\li{dvd\_map\_iff} helper layer and the
+  \li{\_isLocalization}-suffixed transfer lemmas for the prime-generated and
+  prime-or-unit chains; in the current artifact these live in
+  \lf{Localization/IsLocalization.lean} and \lf{Nagata/Lemmas.lean}.
+\item \textbf{PR3: Nagata theorem family.}  Move the abstract theorem family in
+  \lf{Nagata/Theorem.lean}, headed by
+  \li{nagata\_theorem\_isLocalization}, together with the closure and
+  finite-prime-generator corollaries.  The application files can remain outside
+  the PR sequence as downstream demonstrations.
+\end{enumerate}
+
+\noindent
+We do not claim that these PRs have already been opened.  The point is that the
+artifact now supports a reviewable split rather than a single monolithic
+upstreaming story.  The Nagata theorem itself remains the paper-level
+contribution; whether it belongs in Mathlib depends on community demand.
 
 
 % ======================================================================= %
@@ -1352,8 +1497,10 @@ The complete formalization is publicly available at:
 \begin{center}
 \url{https://github.com/Arthur742Ramos/NagataFactoriality}
 \end{center}
-The development targets Lean~4.24.0, builds with Lake (the Lean build system),
-and contains no \li{sorry}, \li{admit}, or \li{axiom} placeholders.
+The artifact described here is the repository snapshot accompanying this
+manuscript.  The development targets Lean~4.24.0, builds with Lake (the Lean
+build system), and contains no \li{sorry}, \li{admit}, or \li{axiom}
+placeholders.
 Table~\ref{tab:stats} summarizes the artifact statistics.
 
 \begin{table}[ht]
@@ -1364,9 +1511,9 @@ Table~\ref{tab:stats} summarizes the artifact statistics.
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Lean source files              & 16  \\
-Lines of Lean source           & 976 \\
-Theorem/lemma declarations     & 75  \\
+Lean source files              & 18   \\
+Lines of Lean source           & 1546 \\
+Theorem/lemma declarations     & 97   \\
 \li{sorry}/\li{admit}/\li{axiom} & 0   \\
 Lean version                   & 4.24.0 \\
 \bottomrule
@@ -1381,10 +1528,8 @@ lake exe cache get     -- fetch prebuilt Mathlib oleans
 lake build             -- build the project
 \end{lstlisting}
 The first command fetches prebuilt object files for the Mathlib dependency,
-avoiding a full rebuild of the library (which can take several hours).  The
-second command compiles all project files, including the application layer.  On
-a modern workstation with cached Mathlib, the project build completes in under
-two minutes.
+avoiding a full rebuild of the library.  The second command compiles all
+project files, including the application layer.
 
 \subsection{Continuous integration}
 
@@ -1414,32 +1559,33 @@ searching the source files.
 \section{Conclusion and future work}\label{sec:conclusion}
 % ======================================================================= %
 
-We have presented a Lean~4 formalization of Nagata's factoriality theorem under
-a prime-generated hypothesis on the multiplicative set, together with a worked
-application establishing unique factorization for polynomial rings via
-Laurent-polynomial localization.  The formalization exercise surfaced a genuine
-mathematical issue---the degeneracy of the prime-or-unit hypothesis---and the
-resulting prime-generated formulation provides a reusable building block for
-localization-based factoriality arguments.  The repository makes that
-reusability explicit by packaging the theorem not only in its abstract
-prime-generated form, but also for submonoid closures generated by prime
-families and for the finite-prime-generator case.
+We have presented, to our knowledge, the first public Lean~4 formalization of
+Nagata's factoriality theorem under a prime-generated hypothesis on the
+multiplicative set.  The contribution is organized around a reusable theorem
+surface that combines concrete \li{Localization\,S} statements, abstract
+\li{IsLocalization} theorem families, and packaged prime-generator entry
+points.  The same interface supports two Nagata-based proofs of the polynomial
+UFD theorem---via Laurent localization and via the fraction field---as well as
+an iterated polynomial corollary obtained by direct reuse.  The formalization
+also exposed that the prime-or-unit variant is too weak as a general theorem
+statement; the corrected prime-generated formulation is the one that supports
+reusable applications.
 
 \paragraph{Limitations.}
 The formalization covers the multiplicative version of Nagata's theorem (for
 submonoids generated by primes).  The more general ideal-theoretic
 formulations---such as the version involving $t$-operations or Krull
-domains---are not addressed.  On the application side, the Laurent-polynomial
-example is intentionally compact; richer applications would further exercise
-the machinery.  Some localization API choices are tailored to this project and
-may need refactoring for eventual Mathlib integration.
+domains---are not addressed.  The two polynomial applications are intended to
+demonstrate reuse of the theorem package rather than to exhaust its range of
+applications; broader downstream case studies would test the abstraction
+further.
 
 \paragraph{Future work.}
 Several directions are natural continuations:
 \begin{enumerate}[nosep]
-\item \textbf{Mathlib integration.}  Abstracting the localization interface
-  from the concrete \li{Localization} type to \li{IsLocalization} would make
-  the results directly usable in Mathlib's ecosystem.
+\item \textbf{Mathlib integration.}  Pursue the concrete three-stage split from
+  Section~\ref{sec:upstream}: prime-generated infrastructure first, then the
+  abstract localization transport API, and finally the Nagata theorem family.
   \item \textbf{Richer applications.}  Beyond the polynomial and iterated-polynomial
   corollaries formalized here, the theorem could be applied to establish unique
   factorization in power-series rings, rings of algebraic integers, or other
@@ -1476,11 +1622,12 @@ A.~Bordg.
 \newblock \url{https://www.isa-afp.org/entries/Localization_Ring.html}.
 
 \bibitem{brasca-flt}
-R.~Brasca, C.~Birkbeck, E.~Rodriguez~Boidi, A.~Best, R.~Van~de~Velde,
+A.~Best, C.~Birkbeck, R.~Brasca, E.~Rodriguez~Boidi, R.~Van~de~Velde,
   and A.~Yang.
 \newblock A complete formalization of {F}ermat's {L}ast {T}heorem for regular
   primes in {L}ean.
-\newblock \emph{Annals of Formalized Mathematics}, 1, 2025.
+\newblock \emph{Annals of Formalized Mathematics}, 1:103--132, 2025.
+\newblock \doi{10.46298/afm.14586}.
 
 \bibitem{divason-berlekamp}
 J.~Divas{\'o}n, S.\,J.\,C.~Joosten, R.~Thiemann, and A.~Yamada.
@@ -1497,7 +1644,8 @@ I.~Kaplansky.
 \bibitem{loeffler-zeta}
 D.~Loeffler and M.~Stoll.
 \newblock Formalizing zeta and {$L$}-functions in {L}ean.
-\newblock \emph{Annals of Formalized Mathematics}, 1, 2025.
+\newblock \emph{Annals of Formalized Mathematics}, 1:43--56, 2025.
+\newblock \doi{10.46298/afm.15328}.
 
 \bibitem{mathlib}
 The mathlib Community.
@@ -1515,7 +1663,8 @@ A.~Mahboubi and E.~Tassi.
 \bibitem{matsumura1989}
 H.~Matsumura.
 \newblock \emph{Commutative Ring Theory}.
-\newblock Cambridge University Press, 1989.
+\newblock Cambridge Studies in Advanced Mathematics, vol.~8. Cambridge
+  University Press, 1989.
 
 \bibitem{moura-lean4}
 L.\,de~Moura and S.~Ullrich.
@@ -1529,26 +1678,31 @@ L.\,de~Moura and S.~Ullrich.
 M.~Nagata.
 \newblock A remark on the unique factorization theorem.
 \newblock \emph{J.~Math.\ Soc.\ Japan}, 9:143--145, 1957.
+\newblock \doi{10.2969/jmsj/00910143}.
 
 \bibitem{nagata1962}
 M.~Nagata.
 \newblock \emph{Local Rings}.
-\newblock Interscience, 1962.
+\newblock Interscience Tracts in Pure and Applied Mathematics, No.~13.
+  Interscience Publishers, New York, 1962.
 
 \bibitem{riou-derived}
 J.~Riou.
 \newblock Formalization of derived categories in {L}ean/mathlib.
-\newblock \emph{Annals of Formalized Mathematics}, 1, 2025.
+\newblock \emph{Annals of Formalized Mathematics}, 1:1--42, 2025.
+\newblock \doi{10.46298/afm.13609}.
 
 \bibitem{samuel1964}
 P.~Samuel.
 \newblock \emph{Lectures on Unique Factorization Domains}.
-\newblock Tata Institute of Fundamental Research, 1964.
+\newblock Lectures on Mathematics and Physics, No.~30. Tata Institute of
+  Fundamental Research, Bombay, 1964.
 
 \bibitem{stacks}
 The {S}tacks {P}roject Authors.
-\newblock \emph{The Stacks Project}.
-\newblock \url{https://stacks.math.columbia.edu}, 2024.
+\newblock \emph{The Stacks Project}, Tag~0AFU.
+\newblock \url{https://stacks.math.columbia.edu}, 2024. Accessed:
+  2026-04-05.
 
 \end{thebibliography}
 
