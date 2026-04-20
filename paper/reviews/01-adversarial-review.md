@@ -126,10 +126,15 @@ The paper should say so explicitly. Right now the artifact surface and the manus
 
 **Severity:** Low
 
-This was resolved in the accompanying revision by naming the submission tag
-`afm-submission-draft-2026-04-04` in the release-packaging discussion.
+An intermediate revision briefly named the remote tag
+`afm-submission-draft-2026-04-04`, but that tag points to an older snapshot
+rather than the current revised manuscript.  The accompanying revision now backs
+away from that false precision and describes archival tagging as a release step
+to perform on the final accepted snapshot.
 
-There is a real remote tag, `afm-submission-draft-2026-04-04`, but the manuscript itself never names the exact tag or commit. It says only that the artifact is a tagged source release. That is weaker than it needs to be.
+For final submission packaging, the exact archival tag or DOI-backed snapshot
+should still be minted from the accepted commit and then cited explicitly in the
+artifact description.
 
 ### 3.3 Related work is formalization-heavy but mathematically thin
 
@@ -258,5 +263,5 @@ For the pre-fix draft, the strongest attack was **not** "the theorem is wrong."
 It was: **the paper was not reliably synchronized with the artifact it
 described**. The accompanying revision addresses most of that synchronization
 drift. What remains is mainly citation-tightening and low-severity
-presentation/discoverability cleanup, not evidence of fake mathematics or a
-broken formal artifact.
+presentation/discoverability cleanup, plus final archival-tag minting at
+submission time, not evidence of fake mathematics or a broken formal artifact.
