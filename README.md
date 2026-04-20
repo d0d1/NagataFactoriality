@@ -37,6 +37,12 @@ At this point, the repository contributes:
 
 We present a Lean 4 / Mathlib formalization of Nagata's factoriality theorem for noetherian integral domains. The central hypothesis is a *prime-generated* condition on the multiplicative set: every element of the submonoid is a finite product of elements that are both prime in the ring and members of the submonoid. Under this hypothesis, if the localization is a UFD, then so is the base ring. The formal development packages the result both for the concrete type `Localization S` and at the abstract `IsLocalization` level, with the transport chain itself available through the abstract interface. As applications, we give two Nagata-based proofs that if `R` is a noetherian UFD then `R[X]` is a UFD—one via Laurent-polynomial localization at powers of `X`, and one via localization at the constant primes and comparison with `Frac(R)[X]`—and we derive the iterated polynomial corollary `R[X][Y]` by reusing the same package. No public formalization of Nagata's factoriality theorem is currently known to us from available Lean, Coq, or Isabelle sources.
 
+## Paper artifacts
+
+- [Manuscript PDF](paper/main.pdf)
+- [Manuscript source](paper/main.tex)
+- [arXiv submission bundle](paper/arxiv-submission.zip)
+
 ## Publication target
 
 The realistic path for this repository is an **ITP/FM-style paper** together with an upstreamable Mathlib contribution:

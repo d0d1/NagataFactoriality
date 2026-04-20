@@ -1,0 +1,222 @@
+# 01 Adversarial Review
+
+This is a converged adversarial review of the submission paper after two independent harsh passes and manual re-checking against the repository and cited sources. Only findings that survived re-verification are included here.
+
+## Overall verdict
+
+The Lean artifact looks real, nontrivial, and substantially consistent with the paper's high-level contribution claim. The biggest problem is **trust erosion from stale prose and stale code listings**, not evidence of fake mathematics. I do **not** see a clear mathematical error in the core formalization. I **do** see enough paper/code drift that I would not trust the manuscript's displayed Lean declarations without checking the repository.
+
+## Severity summary
+
+| Severity | Finding |
+| --- | --- |
+| Medium | The paper says the displayed declarations are kernel-checked, but multiple displayed `_isLocalization` signatures do not match the shipped Lean code. |
+| Medium | The prose description of `nagata_theorem_isLocalization` is false/stale: it describes a `Localization S`/`algEquiv` transport design that the current code does not use. |
+| Medium | The repository heavily advertises an Isabelle/HOL companion, but the paper never states whether that directory is part of the submission artifact or out of scope. |
+| Low | Reproducibility infrastructure is described inaccurately: the checked-out artifact is not pinned by a committed `lake-manifest.json`. |
+| Low | Several historical/source claims are plausible but under-cited: the paper asks the reader to trust book-level references without page or theorem pointers. |
+| Low | The paper is still rough at the exposition level: repeated novelty claims, long/repetitive lessons section, abrupt proof-sketch variables, and visible LaTeX layout warnings in the committed build logs. |
+
+## 1. Hallucination / unsupported claims
+
+### 1.1 The displayed abstract theorem signatures are not the kernel-checked signatures
+
+**Severity:** Medium
+
+The paper states:
+
+- `paper/main.tex` lines 661-665: "All declarations shown below are kernel-checked."
+
+But the displayed abstract theorem signatures do not match the actual Lean code:
+
+- `paper/main.tex` lines 711-716 show `nagata_theorem_isLocalization` with `[CancelCommMonoidWithZero T]`
+- `paper/main.tex` lines 737-744 and 753-759 do the same for the prime-generator `_isLocalization` variants
+- `NagataFactoriality/Nagata/Theorem.lean` lines 20-27, 40-46, and 61-66 require `[IsDomain T]`
+
+`IsDomain T` is strictly stronger than `CancelCommMonoidWithZero T`. This is not a stylistic paraphrase; it is a different API surface. A reader relying on the paper would infer weaker hypotheses than the code actually requires.
+
+### 1.2 The proof-architecture description of the abstract theorem is stale
+
+**Severity:** Medium
+
+The paper says:
+
+- `paper/main.tex` lines 720-724: the proof core still descends through concrete `Localization S`, and the UFD structure is transported via `IsLocalization.algEquiv`
+
+The shipped theorem does something else:
+
+- `NagataFactoriality/Nagata/Theorem.lean` lines 23-27 directly call `nagata_key_lemma_primeGenerated_isLocalization` at target `T` and never build a concrete `Localization S`, never invoke `IsLocalization.algEquiv`, and never transport the UFD structure in the way the prose describes.
+
+This reads like stale text left over from an earlier implementation. For a paper whose contribution is partly about proof architecture, that is a real credibility problem.
+
+### 1.3 Historical claims are plausible but weakly supported as written
+
+**Severity:** Low
+
+The paragraph at `paper/main.tex` lines 1365-1378 makes several fairly specific historical claims:
+
+- Nagata 1957 gave the result in the stated form
+- Samuel treats the single-generator/polynomial case cleanly
+- Matsumura and Kaplansky present the result in full generality
+- the Stacks Project gives a modern exposition and also includes the class-group-to-UFD statement
+
+The sources are real, but the paper gives **no page numbers, theorem numbers, chapter references, or section pointers** for the book claims. That turns a checkable literature statement into "trust me, I remember the books." For a submission paper, that is too loose.
+
+## 2. Correctness
+
+### 2.1 What looks correct
+
+- The repository contains **18 Lean source files** under `NagataFactoriality/`
+- The Lean LOC total is **1546**
+- The theorem/lemma count is **97**
+- I found **no** `sorry`, `admit`, `axiom`, or `native_decide` in `NagataFactoriality/**/*.lean`
+- The main named results cited in the paper exist in the code:
+  - `nagata_theorem`
+  - `nagata_theorem_isLocalization`
+  - `nagata_theorem_of_prime_generators`
+  - `nagata_theorem_of_finite_prime_generators`
+  - `dvd_of_localization_dvd_primeGenerated`
+  - `localization_irreducible_of_irreducible_primeGenerated`
+  - `prime_of_localization_prime_primeGenerated`
+  - `laurentPolynomial_uniqueFactorizationMonoid`
+  - `polynomial_uniqueFactorizationMonoid_via_nagata`
+  - `polynomial_uniqueFactorizationMonoid_via_fractionField`
+
+### 2.2 What still weakens the correctness story
+
+The core problem is not that the artifact appears mathematically broken. The problem is that the paper **misquotes its own code** in the most reader-visible section ("Formal Lean statements"). That makes every other code-facing statement less trustworthy than it should be.
+
+### 2.3 Minor proof-sketch issue
+
+**Severity:** Low
+
+At `paper/main.tex` lines 432-437, the proof sketch for the "irreducibles dividing prime factorizations are prime" lemma introduces a quotient variable `d` abruptly ("then `q` divides `p * d` for some `d`") without explicitly saying it comes from the witness that `p` divides the product of the prime factors. This is not a mathematical error; it is a proof-sketch clarity lapse.
+
+## 3. Completeness
+
+### 3.1 The paper never resolves the Isabelle companion's scope
+
+**Severity:** Medium
+
+The repository README and artifact surface prominently advertise an Isabelle/HOL companion under `isabelle/`, but the paper is written as a Lean-only submission. A reviewer cloning the artifact can reasonably ask:
+
+- Is the Isabelle development part of the claimed contribution?
+- Is it an out-of-scope companion experiment?
+- Is it unfinished and intentionally omitted?
+
+The paper should say so explicitly. Right now the artifact surface and the manuscript tell different stories about what the submission is.
+
+### 3.2 The manuscript does not identify the exact submission snapshot in-body
+
+**Severity:** Low
+
+There is a real remote tag, `afm-submission-draft-2026-04-04`, but the manuscript itself never names the exact tag or commit. It says only that the artifact is a tagged source release. That is weaker than it needs to be.
+
+### 3.3 Related work is formalization-heavy but mathematically thin
+
+**Severity:** Low
+
+The paper discusses nearby formalization projects well enough, but the mathematical literature discussion is shallow relative to the confidence of its historical claims. If the paper wants to say "Samuel does X; Matsumura/Kaplansky do Y; we follow this tradition," it should support that with page-level citations.
+
+## 4. Language / exposition
+
+### 4.1 The lessons section is too long for the amount of new information it carries
+
+**Severity:** Low
+
+The "Lessons from the formalization" section is useful, but it is longer and more repetitive than it needs to be. The multiset-induction story, the dual proof-chain story, and the localization-interface story have already been explained earlier. Tightening this section would improve the paper immediately.
+
+### 4.2 The novelty claim is repeated too often
+
+**Severity:** Low
+
+The "first public formalization known to us" claim is appropriately hedged, but it appears repeatedly in the abstract, introduction, novelty section, and conclusion. Repeating it that often weakens rather than strengthens it.
+
+### 4.3 Some wording is sloppier than the rest of the paper
+
+**Severity:** Low
+
+Examples:
+
+- "collapses" for the prime-or-unit hypothesis is rhetorically punchy but imprecise
+- the AFM-publications paragraph reads more like venue signaling than problem-specific related work
+- several proof-sketch transitions assume more background than the rest of the exposition
+
+### 4.4 The committed LaTeX build logs still show layout warnings
+
+**Severity:** Low
+
+The tracked `paper/build1.log` and `paper/build2.log` each record **12** `Overfull \hbox` / `Underfull \hbox` warnings. That does not make the paper incorrect, but it undercuts any "submission-quality manuscript" self-description.
+
+## 5. Plagiarism / originality
+
+### 5.1 Plagiarism
+
+I did **not** find evidence of textual plagiarism in spot checks. The mathematical material is standard textbook algebra and is attributed as such.
+
+### 5.2 Originality
+
+The originality is in the **formalization engineering**:
+
+- prime-generated packaging instead of the degenerate prime-or-unit formulation
+- theorem-family/API design
+- two Nagata-based polynomial applications
+- reusable localization-side transfer lemmas
+
+The paper is not presenting new commutative algebra, and to its credit it mostly does not pretend otherwise.
+
+### 5.3 Novelty claim
+
+The novelty claim is hedged in a defensible way. Public-code searches did not turn up another Lean/Coq/Isabelle formalization of Nagata's factoriality theorem beyond this repository and its companion materials. Keep the hedge; do not sharpen it.
+
+## 6. Reference-by-reference audit
+
+| Key | Manual check | Supports cited use? | Notes |
+| --- | --- | --- | --- |
+| `baanen-dedekind` | Opened DOI landing and Crossref metadata | Yes | Supports the claim about Dedekind domains/class groups in Lean. |
+| `bordg-localization` | Opened AFP entry page | Yes | Good support for Isabelle localization infrastructure. |
+| `brasca-flt` | Opened DOI landing and Crossref metadata | Yes | Valid venue-context example of a large Lean 4 formalization. |
+| `divason-berlekamp` | Opened DOI landing and Crossref metadata | Yes | Supports the claim about substantial factorization infrastructure in Isabelle. |
+| `kaplansky1970` | Verified existence via OpenLibrary metadata | Partly | Bibliography is real; the paper's specific "full generality" claim is not pinpointed. Add a page/theorem citation. |
+| `loeffler-zeta` | Opened DOI landing and Crossref metadata | Yes | Valid recent Lean related-work citation. |
+| `mathlib` | DOI landing blocked by ACM; Crossref metadata opened | Yes | Bibliographically correct. Crossref confirms CPP 2020 paper. |
+| `mathcomp` | Opened Zenodo page | Mostly | Supports Mathematical Components as a library/book ecosystem, but this is an indirect citation for current library capabilities. |
+| `matsumura1989` | Opened OpenLibrary edition metadata (`OL7738339M`) | Partly | Bibliography is fine; specific theorem-use claim needs a page/chapter pointer. |
+| `moura-lean4` | Opened DOI landing | Yes | Standard Lean 4 citation; fine. |
+| `nagata1957` | Opened Crossref metadata; Project Euclid page blocked by anti-bot | Partly | Existence confirmed, but I could not manually inspect the open text. Add a pinpoint citation if using it for a specific theorem statement. |
+| `nagata1962` | Opened OpenLibrary metadata (`OL26791762M`) | Partly | Real source; specific historical claim needs a page pointer. |
+| `riou-derived` | Opened DOI landing and Crossref metadata | Yes | Valid Lean related-work citation. |
+| `samuel1964` | Opened OpenLibrary edition page and Stanford catalog | Partly | Bibliography line is fine; specific claim about the single-generator/polynomial treatment needs page support. |
+| `stacks` | Tag `0AFU` confirmed via cited web search result; direct Stacks fetch failed | Mostly | Tag `0AFU` supports the Nagata criterion claim. It does **not** by itself justify bundling the separate class-group-triviality claim into the same sentence; that part should be split or separately pinpointed. |
+
+## 7. Artifact / reproducibility / repository-facing issues
+
+### 7.1 The pinned-dependency description is inaccurate
+
+**Severity:** Low
+
+At `paper/main.tex` lines 1332-1333 the paper says Mathlib is pinned by `lean-toolchain` and `lake-manifest.json`. In the committed artifact:
+
+- `.gitignore` explicitly ignores `/lake-manifest.json`
+- a fresh clone does **not** contain `lake-manifest.json`
+- the actual committed dependency pin is in `lakefile.lean`
+
+This is a small but real reproducibility inaccuracy.
+
+### 7.2 The repo shipped the manuscript PDF but did not surface it
+
+**Severity:** Low (repo-facing, not a paper-content defect)
+
+`paper/main.pdf` is tracked, but the root README did not link to it. That is a discoverability failure for reviewers and readers. This PR addresses that by surfacing the PDF from the repository landing page.
+
+## 8. Priority fixes before treating the paper as submission-grade
+
+1. **Make Section 5 honest.** Fix the displayed `_isLocalization` signatures and any other listings that are no longer verbatim.
+2. **Fix the stale proof-architecture prose.** If the abstract theorem is now direct, say so; do not describe the old `Localization S`/`algEquiv` path.
+3. **Resolve artifact scope.** State explicitly whether the Isabelle directory is part of the submission or out of scope.
+4. **Tighten citations.** Add page/theorem pointers for Nagata/Samuel/Matsumura/Kaplansky, and split the Stacks citation if it is meant to support two different results.
+5. **Clean up the paper as a document.** Shorten the lessons section, remove repeated novelty claims, and eliminate the LaTeX overfull/underfull box warnings.
+
+## Bottom line
+
+The strongest attack is **not** "the theorem is wrong." The strongest attack is: **the paper is not reliably synchronized with the artifact it describes**. Fix that, and the submission becomes much easier to trust.
