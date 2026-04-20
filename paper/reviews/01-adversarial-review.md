@@ -2,26 +2,35 @@
 
 This is a converged adversarial review of the submission paper after two independent harsh passes and manual re-checking against the repository and cited sources. Only findings that survived re-verification are included here.
 
+Several of the concrete manuscript-drift findings recorded here were then acted
+on in the accompanying revision to `paper/main.tex`. Unless a section says
+otherwise, the quoted manuscript line references below refer to the pre-fix
+draft reviewed during this pass, not the revised manuscript now shipped in this
+branch.
+
 ## Overall verdict
 
-The Lean artifact looks real, nontrivial, and substantially consistent with the paper's high-level contribution claim. The biggest problem is **trust erosion from stale prose and stale code listings**, not evidence of fake mathematics. I do **not** see a clear mathematical error in the core formalization. I **do** see enough paper/code drift that I would not trust the manuscript's displayed Lean declarations without checking the repository.
+The Lean artifact looks real, nontrivial, and substantially consistent with the paper's high-level contribution claim. At review start, the biggest problem was **trust erosion from stale prose and stale code listings**, not evidence of fake mathematics. I do **not** see a clear mathematical error in the core formalization. Several of those paper/code-drift issues were then corrected in the accompanying revision.
 
 ## Severity summary
 
 | Severity | Finding |
 | --- | --- |
-| Medium | The paper says the displayed declarations are kernel-checked, but multiple displayed `_isLocalization` signatures do not match the shipped Lean code. |
-| Medium | The prose description of `nagata_theorem_isLocalization` is false/stale: it describes a `Localization S`/`algEquiv` transport design that the current code does not use. |
-| Medium | The repository heavily advertises an Isabelle/HOL companion, but the paper never states whether that directory is part of the submission artifact or out of scope. |
-| Low | Reproducibility infrastructure is described inaccurately: the checked-out artifact is not pinned by a committed `lake-manifest.json`. |
+| Medium | In the pre-fix draft, multiple displayed `_isLocalization` signatures did not match the shipped Lean code; the accompanying revision fixes them. |
+| Medium | In the pre-fix draft, the prose description of `nagata_theorem_isLocalization` described a `Localization S`/`algEquiv` transport design that the current code did not use; the accompanying revision fixes that drift. |
+| Medium | In the pre-fix draft, the paper never stated whether the Isabelle/HOL companion was part of the submission artifact or out of scope; the accompanying revision now does. |
+| Low | In the pre-fix draft, reproducibility infrastructure was described inaccurately: the checked-out artifact was not pinned by a committed `lake-manifest.json`. The accompanying revision fixes this. |
 | Low | Several historical/source claims are plausible but under-cited: the paper asks the reader to trust book-level references without page or theorem pointers. |
-| Low | The paper is still rough at the exposition level: repeated novelty claims, long/repetitive lessons section, abrupt proof-sketch variables, and visible LaTeX layout warnings in the committed build logs. |
+| Low | The paper had several exposition-level rough edges during review: repeated novelty claims, a long/repetitive lessons section, abrupt proof-sketch variables, and visible LaTeX layout warnings in the original committed build logs. |
 
 ## 1. Hallucination / unsupported claims
 
 ### 1.1 The displayed abstract theorem signatures are not the kernel-checked signatures
 
 **Severity:** Medium
+
+This finding applied to the pre-fix draft reviewed in this pass. The
+accompanying revision updates the displayed signatures to match the Lean code.
 
 The paper states:
 
@@ -38,6 +47,10 @@ But the displayed abstract theorem signatures do not match the actual Lean code:
 ### 1.2 The proof-architecture description of the abstract theorem is stale
 
 **Severity:** Medium
+
+This finding applied to the pre-fix draft reviewed in this pass. The
+accompanying revision rewrites the prose to describe the current direct
+abstract-interface proof path.
 
 The paper says:
 
@@ -98,6 +111,9 @@ At `paper/main.tex` lines 432-437, the proof sketch for the "irreducibles dividi
 
 **Severity:** Medium
 
+This was resolved in the accompanying revision, which now marks the Isabelle
+directory out of scope for the paper's Lean artifact claims.
+
 The repository README and artifact surface prominently advertise an Isabelle/HOL companion under `isabelle/`, but the paper is written as a Lean-only submission. A reviewer cloning the artifact can reasonably ask:
 
 - Is the Isabelle development part of the claimed contribution?
@@ -109,6 +125,9 @@ The paper should say so explicitly. Right now the artifact surface and the manus
 ### 3.2 The manuscript does not identify the exact submission snapshot in-body
 
 **Severity:** Low
+
+This was resolved in the accompanying revision by naming the submission tag
+`afm-submission-draft-2026-04-04` in the release-packaging discussion.
 
 There is a real remote tag, `afm-submission-draft-2026-04-04`, but the manuscript itself never names the exact tag or commit. It says only that the artifact is a tagged source release. That is weaker than it needs to be.
 
@@ -130,11 +149,18 @@ The "Lessons from the formalization" section is useful, but it is longer and mor
 
 **Severity:** Low
 
+The accompanying revision trims some of this repeated priority language; this
+section records why that cleanup was warranted.
+
 The "first public formalization known to us" claim is appropriately hedged, but it appears repeatedly in the abstract, introduction, novelty section, and conclusion. Repeating it that often weakens rather than strengthens it.
 
 ### 4.3 Some wording is sloppier than the rest of the paper
 
 **Severity:** Low
+
+The accompanying revision fixes the imprecise "collapses" wording and one of
+the abrupt proof-sketch transitions; this section records why those edits were
+needed.
 
 Examples:
 
@@ -142,11 +168,15 @@ Examples:
 - the AFM-publications paragraph reads more like venue signaling than problem-specific related work
 - several proof-sketch transitions assume more background than the rest of the exposition
 
-### 4.4 The committed LaTeX build logs still show layout warnings
+### 4.4 The original committed LaTeX build logs showed layout warnings
 
 **Severity:** Low
 
-The tracked `paper/build1.log` and `paper/build2.log` each record **12** `Overfull \hbox` / `Underfull \hbox` warnings. That does not make the paper incorrect, but it undercuts any "submission-quality manuscript" self-description.
+At review time, the tracked `paper/build1.log` and `paper/build2.log` each
+recorded **12** `Overfull \hbox` / `Underfull \hbox` warnings. That did not
+make the paper incorrect, but it undercut any "submission-quality manuscript"
+self-description. The accompanying revision rebuilds the tracked PDF and logs
+without those box warnings.
 
 ## 5. Plagiarism / originality
 
@@ -195,6 +225,10 @@ The novelty claim is hedged in a defensible way. Public-code searches did not tu
 
 **Severity:** Low
 
+This was resolved in the accompanying revision, which now cites
+`lakefile.lean` as the checked-in Mathlib pin and explains that
+`lake-manifest.json` is generated locally.
+
 At `paper/main.tex` lines 1332-1333 the paper says Mathlib is pinned by `lean-toolchain` and `lake-manifest.json`. In the committed artifact:
 
 - `.gitignore` explicitly ignores `/lake-manifest.json`
@@ -207,16 +241,22 @@ This is a small but real reproducibility inaccuracy.
 
 **Severity:** Low (repo-facing, not a paper-content defect)
 
-`paper/main.pdf` is tracked, but the root README did not link to it. That is a discoverability failure for reviewers and readers. This PR addresses that by surfacing the PDF from the repository landing page.
+`paper/main.pdf` is tracked, but the root README did not link to it at review
+time. That is a discoverability failure for reviewers and readers.
 
 ## 8. Priority fixes before treating the paper as submission-grade
 
-1. **Make Section 5 honest.** Fix the displayed `_isLocalization` signatures and any other listings that are no longer verbatim.
-2. **Fix the stale proof-architecture prose.** If the abstract theorem is now direct, say so; do not describe the old `Localization S`/`algEquiv` path.
-3. **Resolve artifact scope.** State explicitly whether the Isabelle directory is part of the submission or out of scope.
+1. **Make Section 5 honest.** Fix the displayed `_isLocalization` signatures and any other listings that are no longer verbatim. **Resolved in the accompanying revision.**
+2. **Fix the stale proof-architecture prose.** If the abstract theorem is now direct, say so; do not describe the old `Localization S`/`algEquiv` path. **Resolved in the accompanying revision.**
+3. **Resolve artifact scope.** State explicitly whether the Isabelle directory is part of the submission or out of scope. **Resolved in the accompanying revision.**
 4. **Tighten citations.** Add page/theorem pointers for Nagata/Samuel/Matsumura/Kaplansky, and split the Stacks citation if it is meant to support two different results.
-5. **Clean up the paper as a document.** Shorten the lessons section, remove repeated novelty claims, and eliminate the LaTeX overfull/underfull box warnings.
+5. **Clean up the paper as a document.** Shorten the lessons section, remove repeated novelty claims, and eliminate the LaTeX overfull/underfull box warnings. The accompanying revision resolves the box warnings and trims some of the repeated novelty language.
 
 ## Bottom line
 
-The strongest attack is **not** "the theorem is wrong." The strongest attack is: **the paper is not reliably synchronized with the artifact it describes**. Fix that, and the submission becomes much easier to trust.
+For the pre-fix draft, the strongest attack was **not** "the theorem is wrong."
+It was: **the paper was not reliably synchronized with the artifact it
+described**. The accompanying revision addresses most of that synchronization
+drift. What remains is mainly citation-tightening and low-severity
+presentation/discoverability cleanup, not evidence of fake mathematics or a
+broken formal artifact.
