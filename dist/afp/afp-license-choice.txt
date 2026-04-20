@@ -1,0 +1,5 @@
+BSD License
+
+Reason: AFP accepts either a BSD-style license or the GNU LGPL. BSD is the
+more permissive of the two options and is therefore the best fit for "most open
+license possible" within AFP's submission rules.

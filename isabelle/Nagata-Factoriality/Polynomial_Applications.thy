@@ -39,10 +39,14 @@ lemma polynomial_prime_generated_powers_X:
 end
 
 locale polynomial_away_X_localization =
-  poly: nagata_localization "K[X]" "ring_powers_set (K[X]) X" +
-  base: domain R
-  for R (structure) and K
+  fixes R (structure) and P (structure) and S and K
+  assumes poly_axioms: "nagata_localization P S"
+    and base_axioms: "domain R"
+    and P_eq: "P = K[X]"
+    and S_eq: "S = ring_powers_set (K[X]) X"
 begin
+
+abbreviation loc_ring where "loc_ring \<equiv> eq_obj_rng_of_frac.rec_rng_of_frac P S"
 
 text \<open>
   Once a localization of K[X] at the powers of X has been fixed, Nagata's
@@ -54,17 +58,34 @@ lemma polynomial_factorial_of_localized_X_factorial:
   assumes K: "subring K R"
     and noeth: "noetherian_domain (K[X])"
     and hX: "ring_prime\<^bsub>K[X]\<^esub> X"
-    and loc_fd: "factorial_domain poly.rec_rng_of_frac"
+    and loc_fd: "factorial_domain loc_ring"
   shows "factorial_domain (K[X])"
-  using poly.nagata_theorem[OF noeth base.polynomial_prime_generated_powers_X[OF K hX] loc_fd] .
+proof -
+  have noethP: "noetherian_domain P"
+    using noeth unfolding P_eq .
+  have hXP: "ring_prime\<^bsub>P\<^esub> X"
+    using hX unfolding P_eq .
+  have hS: "ring_prime_generated P S"
+    unfolding P_eq S_eq
+    by (rule domain.polynomial_prime_generated_powers_X[OF base_axioms K hX])
+  have fdP: "factorial_domain P"
+    by (rule nagata_localization.nagata_theorem[OF poly_axioms noethP hS loc_fd])
+  show ?thesis
+    using fdP unfolding P_eq .
+qed
 
 lemma polynomial_factorial_of_localized_X_factorial_field:
   assumes K: "subfield K R"
     and noeth: "noetherian_domain (K[X])"
-    and loc_fd: "factorial_domain poly.rec_rng_of_frac"
+    and loc_fd: "factorial_domain loc_ring"
   shows "factorial_domain (K[X])"
-  by (rule polynomial_factorial_of_localized_X_factorial[
-        OF subfieldE(1)[OF K] noeth base.polynomial_prime_X[OF K] loc_fd])
+proof -
+  have hX: "ring_prime\<^bsub>K[X]\<^esub> X"
+    by (rule domain.polynomial_prime_X[OF base_axioms K])
+  show ?thesis
+    by (rule polynomial_factorial_of_localized_X_factorial[
+          OF subfieldE(1)[OF K] noeth hX loc_fd])
+qed
 
 end
 

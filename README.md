@@ -12,7 +12,7 @@ A Lean 4 / Mathlib project aimed at a **publication-ready formalization of a pri
   - `NagataFactoriality\Applications\Laurent.lean` localizes at powers of `X`
   - `NagataFactoriality\Applications\FractionField.lean` localizes at the constant primes and compares with `Frac(R)[X]`
 - `NagataFactoriality\Applications\Laurent.lean` also contains an iterated polynomial corollary obtained by reusing the same Nagata package.
-- `isabelle\Nagata-Factoriality\` now contains an AFP-style Isabelle/HOL session that formalizes the prime-generated multiplicative-set core, the AFP-localization helper layer, record-based Nagata theorem variants for prime-generated and prime-or-unit multiplicative sets, and an abstract polynomial application for localization away `X`.
+- `isabelle\Nagata-Factoriality\` now contains an AFP-style Isabelle/HOL session that formalizes the prime-generated multiplicative-set core, the AFP-localization helper layer, record-based Nagata theorem variants for prime-generated and prime-or-unit multiplicative sets, packaged prime-generator-closure wrappers, and abstract polynomial applications for localization away `X` and constant-prime closures.
 - CI, citation metadata, and a successful full `lake build` are in place.
 - `paper\main.tex` now provides a manuscript draft with introduction, cited related work, proof architecture, upstreaming scope, and artifact-release guidance.
 - No public formalization of Nagata's factoriality theorem is currently known to us from available Lean, Coq, or Isabelle sources.
@@ -26,7 +26,7 @@ At this point, the repository contributes:
 2. A public theorem surface that includes both concrete `Localization S` statements and abstract `_isLocalization` wrappers, together with packaged variants for arbitrary and finite prime-generator families.
 3. Supporting localization lemmas that bridge the concrete and abstract localization interfaces.
 4. Two theorem-driven Nagata applications for `R[X]` via different localizations, plus an iterated polynomial corollary showing direct reuse of the package.
-5. An AFP-style Isabelle/HOL session that packages the prime-generated multiplicative-set infrastructure, a wrapper layer over AFP localization, record-based Nagata theorem variants, and the first abstract polynomial application layer as the core of the Isabelle port.
+5. An AFP-style Isabelle/HOL session that packages the prime-generated multiplicative-set infrastructure, a wrapper layer over AFP localization, record-based Nagata theorem variants including prime-generator-closure wrappers, and abstract polynomial application layers for the away-`X` and constant-prime routes as the core of the Isabelle port.
 
 ## Related-work snapshot
 
@@ -88,7 +88,7 @@ The directory `isabelle\Nagata-Factoriality\` is organized as a single-session A
 - `ROOT` defines the `Nagata-Factoriality` session in chapter `AFP`
 - `Prime_Generated.thy` formalizes prime-generated multiplicative sets and closure lemmas
 - `Localization_Interface.thy` packages a small wrapper layer over AFP's `Localization_Ring`, including representative equality, surjectivity, denominator rescaling, cross-multiplication, unit, and injectivity lemmas
-- `Nagata_Lemmas.thy` proves the record-based descent lemmas and theorems `nagata_theorem` and `nagata_theorem_of_prime_or_unit`
+- `Nagata_Lemmas.thy` proves the record-based descent lemmas and theorems `nagata_theorem`, `nagata_theorem_of_prime_or_unit`, `nagata_theorem_of_prime_generators`, and `nagata_theorem_of_finite_prime_generators`
 - `Polynomial_Applications.thy` proves `polynomial_prime_X` over fields together with the abstract away-`X` descent theorem `polynomial_factorial_of_localized_X_factorial`
 - `Fraction_Field_Applications.thy` packages the constant-prime closure specialization `polynomial_factorial_of_localized_constant_primes_factorial`, i.e. the abstract fraction-field route before the final localization/comparison step
 - `Nagata_Factoriality.thy` exposes the top-level entry surface and the constant-prime polynomial corollary

@@ -1,0 +1,1 @@
+Potential candidates for later Isabelle/HOL library inclusion are the reusable prime-generated multiplicative-set lemmas in Prime_Generated and selected localization helper lemmas in Localization_Interface. The application theories are intended as downstream demonstrations rather than distribution-library material.

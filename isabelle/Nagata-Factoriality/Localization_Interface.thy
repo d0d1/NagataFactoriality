@@ -9,10 +9,10 @@ section \<open>Localization helper lemmas\<close>
 
 text \<open>
   The AFP entry \<^theory>\<open>Localization_Ring.Localization\<close> develops localizations as
-  quotient rings in the HOL-Algebra hierarchy.  For the Nagata port we package
-  a small wrapper layer that mirrors the Lean helper API at the level of
-  equality of representatives, denominator rescaling, units coming from the
-  multiplicative set, and injectivity of the canonical map.
+  quotient rings in the HOL-Algebra hierarchy.  For the present development we
+  package a small wrapper layer at the level of equality of representatives,
+  denominator rescaling, units coming from the multiplicative set, and
+  injectivity of the canonical map.
 \<close>
 
 context eq_obj_rng_of_frac
@@ -68,10 +68,10 @@ proof -
   have hmonoid_mult:
       "(r |\<^bsub>rel\<^esub> s) \<otimes>\<^bsub>rec_monoid_rng_of_frac\<^esub> (r' |\<^bsub>rel\<^esub> s') =
         mult_rng_of_frac (r |\<^bsub>rel\<^esub> s) (r' |\<^bsub>rel\<^esub> s')"
-    by (simp only: rec_monoid_rng_of_frac_def)
+    by (simp add: rec_monoid_rng_of_frac_def)
   have "(r |\<^bsub>rel\<^esub> s) \<otimes>\<^bsub>rec_rng_of_frac\<^esub> (r' |\<^bsub>rel\<^esub> s') =
       mult_rng_of_frac (r |\<^bsub>rel\<^esub> s) (r' |\<^bsub>rel\<^esub> s')"
-    by (simp only: rec_monoid_rng_of_frac_def rec_rng_of_frac_def)
+    by (simp only: rec_rng_of_frac_def ring_record_simps)
   also have "\<dots> = (r |\<^bsub>rel\<^esub> s) \<otimes>\<^bsub>rec_monoid_rng_of_frac\<^esub> (r' |\<^bsub>rel\<^esub> s')"
     using hmonoid_mult by simp
   also have "\<dots> = (r \<otimes>\<^bsub>R\<^esub> r' |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> s')"
@@ -446,7 +446,7 @@ proof -
           using s_carrier by simp
       qed
       also have "\<dots> = \<one>\<^bsub>rec_rng_of_frac\<^esub>"
-        by (simp only: rec_rng_of_frac_def)
+        by (simp only: rec_rng_of_frac_def ring_record_simps)
       finally show ?thesis .
     qed
     have right_inv:
@@ -468,7 +468,7 @@ proof -
           using s_carrier by simp
       qed
       also have "\<dots> = \<one>\<^bsub>rec_rng_of_frac\<^esub>"
-        by (smt monoid.select_convs(3) rec_rng_of_frac_def)
+        by (simp only: rec_rng_of_frac_def ring_record_simps)
       finally show ?thesis .
     qed
     have frac_in: "(\<one> |\<^bsub>rel\<^esub> s) \<in> carrier rec_rng_of_frac"
@@ -490,7 +490,7 @@ proof -
   show ?thesis
   proof -
     have "rng_to_rng_of_frac u \<otimes>\<^bsub>rec_rng_of_frac\<^esub> (\<one> |\<^bsub>rel\<^esub> s) \<in> Units rec_rng_of_frac"
-      using map_unit denom_unit by (rule Units_m_closed)
+      by (rule monoid.Units_m_closed[OF ring.is_monoid[OF rng_rng_of_frac] map_unit denom_unit])
     then show ?thesis
       using frac_eq by simp
   qed

@@ -215,9 +215,9 @@ proof (rule ring_prime_generatedI)
         case (Suc n)
         have "foldr (\<otimes>\<^bsub>R\<^esub>) (replicate (Suc n) p) \<one>\<^bsub>R\<^esub> =
             p \<otimes>\<^bsub>R\<^esub> p [^]\<^bsub>R\<^esub> n"
-          using Suc.IH by simp
+          using Suc.IH p_in by simp
         also have "\<dots> = p [^]\<^bsub>R\<^esub> (Suc n)"
-          using p_in by (simp add: R.nat_pow_Suc2[OF p_in] R.m_comm R.nat_pow_closed)
+          by (rule sym[OF R.nat_pow_Suc2[OF p_in]])
         finally show ?case .
       qed
       then show ?thesis
@@ -460,6 +460,10 @@ proof -
     qed
     have s_prime: "prime R s"
       using ring_primeE(3)[OF s_in_carrier hs_prime] .
+    have s_nz: "s \<noteq> \<zero>"
+      using ring_primeE(1)[OF s_in_carrier hs_prime] .
+    have p_nz: "p \<noteq> \<zero>"
+      using ring_irreducibleE(1)[OF p_in hp] .
     have s_assoc_p_mult: "s \<sim>\<^bsub>mult_of R\<^esub> p"
       using assoc_iff_assoc_mult[OF s_in_carrier p_in] associated_sym[OF p_assoc_s] by blast
     have s_prime_mult: "prime (mult_of R) s"
@@ -469,15 +473,16 @@ proof -
       have "prime (mult_of R) p"
       proof (rule mult_of.prime_cong[OF s_prime_mult s_assoc_p_mult])
         show "s \<in> carrier (mult_of R)"
-          using s_in_carrier by simp
+          using s_in_carrier s_nz by simp
         show "p \<in> carrier (mult_of R)"
-          using p_in by simp
+          using p_in p_nz by simp
       qed
       then show ?thesis
         using prime_eq_prime_mult[OF p_in] by blast
     qed
-    then show ?thesis
-      using ring_irreducibleE(1)[OF p_in hp] by (rule ring_primeI)
+    then have p_prime: "prime R p" .
+    from p_nz p_prime show ?thesis
+      by (rule ring_primeI)
   next
     assume hs_unit: "s \<in> Units R"
     have "p \<in> Units R"
@@ -547,14 +552,16 @@ proof -
         have "q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> = p \<otimes>\<^bsub>R\<^esub> d"
           using hd by simp
         then show ?thesis
-        proof -
+        proof -  
           have "p \<otimes>\<^bsub>R\<^esub> d = q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>"
-            by simp
+            using hd by simp
           then show ?thesis
             unfolding factor_def using rest_carr by blast
         qed
       qed
-      from prime_divides[OF p_in d_in q_prime q_dvd_pd] show ?case
+      have q_dvd_p_or_d: "q divides\<^bsub>R\<^esub> p \<or> q divides\<^bsub>R\<^esub> d"
+        using primeE[OF q_prime] p_in d_in q_dvd_pd by blast
+      from q_dvd_p_or_d show ?case
       proof
         assume q_dvd_p: "q divides\<^bsub>R\<^esub> p"
         have q_assoc_p: "q \<sim>\<^bsub>R\<^esub> p"
@@ -568,7 +575,7 @@ proof -
             by blast
         qed
         have q_assoc_p_mult: "q \<sim>\<^bsub>mult_of R\<^esub> p"
-          using assoc_iff_assoc_mult[OF q_carr p_in] associated_sym[OF q_assoc_p] by blast
+          using assoc_iff_assoc_mult[OF q_carr p_in] q_assoc_p by blast
         have q_prime_mult: "prime (mult_of R) q"
           using prime_eq_prime_mult[OF q_carr] q_prime by blast
         have "prime R p"
@@ -576,15 +583,16 @@ proof -
           have "prime (mult_of R) p"
           proof (rule mult_of.prime_cong[OF q_prime_mult q_assoc_p_mult])
             show "q \<in> carrier (mult_of R)"
-              using q_carr by simp
+              using q_carr q_nz by simp
             show "p \<in> carrier (mult_of R)"
-              using p_in by simp
+              using p_in ring_irreducibleE(1)[OF p_in hp] by simp
           qed
           then show ?thesis
             using prime_eq_prime_mult[OF p_in] by blast
         qed
-        then show ?thesis
-          using ring_irreducibleE(1)[OF p_in hp] by (rule ring_primeI)
+        then have p_prime: "prime R p" .
+        from ring_irreducibleE(1)[OF p_in hp] p_prime show ?thesis
+          by (rule ring_primeI)
       next
         assume q_dvd_d: "q divides\<^bsub>R\<^esub> d"
         obtain e where e_in: "e \<in> carrier R" and he: "d = q \<otimes>\<^bsub>R\<^esub> e"
@@ -594,7 +602,7 @@ proof -
         have rest_eq: "foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> = p \<otimes>\<^bsub>R\<^esub> e"
         proof -
           have "q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> = q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> e)"
-            using hd he by (simp add: m_assoc m_comm m_lcomm)
+            using hd he q_carr rest_carr p_in e_in by (simp add: m_assoc m_comm m_lcomm)
           then show ?thesis
             using q_nz q_carr rest_carr pe_carr by (simp add: m_lcancel)
         qed
@@ -663,7 +671,9 @@ proof -
       then show ?thesis
         unfolding factor_def using a_in by blast
     qed
-    from prime_divides[OF p_in c_in s_prime s_dvd_pc] show ?thesis
+    have s_dvd_p_or_c: "s divides\<^bsub>R\<^esub> p \<or> s divides\<^bsub>R\<^esub> c"
+      using primeE[OF s_prime] p_in c_in s_dvd_pc by blast
+    from s_dvd_p_or_c show ?thesis
     proof
       assume s_dvd_p: "s divides\<^bsub>R\<^esub> p"
       have s_assoc_p: "s \<sim>\<^bsub>R\<^esub> p"
@@ -689,7 +699,7 @@ proof -
       have pd_in: "p \<otimes>\<^bsub>R\<^esub> d \<in> carrier R"
         using p_in d_in by auto
       have "s \<otimes>\<^bsub>R\<^esub> a = s \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> d)"
-        using hc hd by (simp add: m_assoc)
+        using hc hd s_in_carrier a_in p_in d_in by (simp add: m_assoc m_comm m_lcomm)
       then have "a = p \<otimes>\<^bsub>R\<^esub> d"
         using s_nz s_in_carrier a_in pd_in by (simp add: m_lcancel)
       then show ?thesis
@@ -804,13 +814,7 @@ proof -
       from Nil.prems have d_in: "d \<in> carrier R" and eq: "a = p \<otimes>\<^bsub>R\<^esub> d"
         using a_in by simp_all
       show ?case
-        unfolding factor_def
-      proof (intro exI conjI)
-        show "d \<in> carrier R"
-          using d_in .
-        show "a = p \<otimes>\<^bsub>R\<^esub> d"
-          using eq .
-      qed
+        using d_in eq unfolding factor_def by blast
     next
       case (Cons q qs)
     have q_in: "q \<in> S"
@@ -841,17 +845,25 @@ proof -
       using rest_carr a_in by auto
     have q_dvd_pd: "q divides\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> d)"
     proof -
-      have "q \<otimes>\<^bsub>R\<^esub> (foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a) = p \<otimes>\<^bsub>R\<^esub> d"
-        using Cons.prems(5) by (simp add: m_assoc)
+      have hqd: "q \<otimes>\<^bsub>R\<^esub> (foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a) = p \<otimes>\<^bsub>R\<^esub> d"
+      proof -
+        have "(q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) \<otimes>\<^bsub>R\<^esub> a = p \<otimes>\<^bsub>R\<^esub> d"
+          using Cons.prems(5) by simp
+        then show ?thesis
+          using q_carr rest_carr a_in by (simp add: m_assoc)
+      qed
       then show ?thesis
       proof -
         have "p \<otimes>\<^bsub>R\<^esub> d = q \<otimes>\<^bsub>R\<^esub> (foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a)"
+          using hqd
           by simp
         then show ?thesis
           unfolding factor_def using resta_carr by blast
       qed
     qed
-    from prime_divides[OF p_in Cons.prems(4) q_prime q_dvd_pd] show ?case
+    have q_dvd_p_or_d: "q divides\<^bsub>R\<^esub> p \<or> q divides\<^bsub>R\<^esub> d"
+      using primeE[OF q_prime] p_in Cons.prems(4) q_dvd_pd by blast
+    from q_dvd_p_or_d show ?case
     proof
       assume q_dvd_p: "q divides\<^bsub>R\<^esub> p"
       have q_assoc_p: "q \<sim>\<^bsub>R\<^esub> p"
@@ -878,13 +890,15 @@ proof -
       proof -
         have "q \<otimes>\<^bsub>R\<^esub> (foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a) =
             q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> e)"
-          using Cons.prems(5) he by (simp add: m_assoc m_comm m_lcomm)
+          using Cons.prems(5) he q_carr rest_carr a_in p_in e_in
+          by (simp add: m_assoc m_comm m_lcomm)
         then show ?thesis
           using q_nz q_carr resta_carr pe_carr by (simp add: m_lcancel)
       qed
       show ?thesis
         by (rule Cons.IH[OF qs_sub qs_prime qs_not e_in rest_eq])
     qed
+  qed
   qed
   show ?thesis
     by (rule hmain[OF fs_sub hf hnot c_in hEq])
@@ -940,9 +954,11 @@ proof
       "rng_to_rng_of_frac p divides\<^bsub>rec_rng_of_frac\<^esub> rng_to_rng_of_frac \<one>"
     using map_p_dvd_one ring_hom_one[OF rng_to_rng_of_frac_is_ring_hom]
     by simp
+  have one_in: "\<one> \<in> carrier R"
+    by simp
   have hdiv:
       "\<exists>s \<in> S. p divides\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> \<one>)"
-    using dvd_map_iff[OF p_in one_closed zero_notin no_zero_divisors] map_p_dvd_map_one
+    using dvd_map_iff[OF p_in one_in zero_notin no_zero_divisors] map_p_dvd_map_one
     by blast
   then obtain s where s_in: "s \<in> S" and p_dvd_s: "p divides\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> \<one>)"
     by blast
@@ -983,7 +999,7 @@ proof -
   have zero_notin: "\<zero> \<notin> S"
     using hS by (rule zero_notin_submonoid_of_prime_or_unit)
   have map_p_in: "rng_to_rng_of_frac p \<in> carrier rec_rng_of_frac"
-    using p_in ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom] .
+    by (rule ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in])
   have map_p_nz: "rng_to_rng_of_frac p \<noteq> \<zero>\<^bsub>rec_rng_of_frac\<^esub>"
     using map_eq_zero_iff[OF p_in zero_notin no_zero_divisors]
       ring_irreducibleE(1)[OF p_in hp]
@@ -1028,14 +1044,23 @@ proof -
       using a_in b_in st_in by (simp add: rel_def)
     have frac_prod:
         "x \<otimes>\<^bsub>rec_rng_of_frac\<^esub> y = (a \<otimes>\<^bsub>R\<^esub> b |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> t)"
-      using mult_rng_of_frac_fundamental_lemma[OF as_rel bt_rel] x_def y_def
-      by (simp add: rec_monoid_rng_of_frac_def rec_rng_of_frac_def)
+      using fraction_mult_rep[OF as_rel bt_rel] x_def y_def by simp
     have eq_frac:
         "rng_to_rng_of_frac p = (a \<otimes>\<^bsub>R\<^esub> b |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> t)"
       using xy frac_prod by (simp add: rng_to_rng_of_frac_def)
+    have p_eq_raw: "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p =
+        \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b)"
+    proof -
+      have eq_cross:
+          "rng_to_rng_of_frac p = (a \<otimes>\<^bsub>R\<^esub> b |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> t) \<longleftrightarrow>
+            (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b)"
+        using fraction_eq_iff_cross_multiply[OF p_rel ab_rel zero_notin no_zero_divisors]
+        unfolding rng_to_rng_of_frac_def by simp
+      from eq_cross eq_frac show ?thesis
+        by blast
+    qed
     have p_eq: "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = a \<otimes>\<^bsub>R\<^esub> b"
-      using fraction_eq_iff_cross_multiply[OF p_rel ab_rel zero_notin no_zero_divisors] eq_frac
-      by (simp add: m_assoc)
+      using p_eq_raw ab_in by simp
     from hS[OF st_in] show "x \<in> Units rec_rng_of_frac \<or> y \<in> Units rec_rng_of_frac"
     proof
       assume hst_prime: "ring_prime\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> t)"
@@ -1043,8 +1068,16 @@ proof -
         and st_nz: "s \<otimes>\<^bsub>R\<^esub> t \<noteq> \<zero>"
         using ring_primeE[OF st_carrier hst_prime] by auto
       have st_dvd_ab: "(s \<otimes>\<^bsub>R\<^esub> t) divides\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b)"
-        unfolding factor_def using p_in p_eq by blast
-      from prime_divides[OF a_in b_in st_prime st_dvd_ab] show ?thesis
+      proof -
+        have ab_eq: "a \<otimes>\<^bsub>R\<^esub> b = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p"
+          using p_eq by simp
+        show ?thesis
+          by (rule dividesI[OF p_in ab_eq])
+      qed
+      have st_dvd_a_or_b:
+          "(s \<otimes>\<^bsub>R\<^esub> t) divides\<^bsub>R\<^esub> a \<or> (s \<otimes>\<^bsub>R\<^esub> t) divides\<^bsub>R\<^esub> b"
+        using primeE[OF st_prime] a_in b_in st_dvd_ab by blast
+      from st_dvd_a_or_b show ?thesis
       proof
         assume st_dvd_a: "(s \<otimes>\<^bsub>R\<^esub> t) divides\<^bsub>R\<^esub> a"
         then obtain d where d_in: "d \<in> carrier R" and hd: "a = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> d"
@@ -1053,8 +1086,14 @@ proof -
           using d_in b_in by auto
         have "p = d \<otimes>\<^bsub>R\<^esub> b"
         proof -
-          have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> (d \<otimes>\<^bsub>R\<^esub> b)"
-            using p_eq hd by (simp add: m_assoc)
+          have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = a \<otimes>\<^bsub>R\<^esub> b"
+            by (rule p_eq)
+          also have "\<dots> = ((s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> d) \<otimes>\<^bsub>R\<^esub> b"
+            using hd by simp
+          also have "\<dots> = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> (d \<otimes>\<^bsub>R\<^esub> b)"
+            using st_carrier d_in b_in by (simp add: m_assoc)
+          finally have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p =
+              (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> (d \<otimes>\<^bsub>R\<^esub> b)" .
           then show ?thesis
             using st_nz st_carrier p_in db_in by (simp add: m_lcancel)
         qed
@@ -1071,12 +1110,16 @@ proof -
             using td_in one_closed by (simp add: rel_def)
           have x_eq_map_td: "x = rng_to_rng_of_frac (t \<otimes>\<^bsub>R\<^esub> d)"
           proof -
+            have s_in_carrier: "s \<in> carrier R"
+              using s_in subset rev_subsetD by blast
             have "x = (a |\<^bsub>rel\<^esub> s)"
               using x_def by simp
             also have "\<dots> = ((s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> d |\<^bsub>rel\<^esub> s)"
               using hd by (simp add: m_assoc)
+            also have "\<dots> = (s \<otimes>\<^bsub>R\<^esub> (t \<otimes>\<^bsub>R\<^esub> d) |\<^bsub>rel\<^esub> s)"
+              using s_in_carrier t_in_carrier d_in by (simp add: m_assoc)
             also have "\<dots> = (s \<otimes>\<^bsub>R\<^esub> (t \<otimes>\<^bsub>R\<^esub> d) |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> \<one>)"
-              using t_in_carrier d_in by (simp add: m_assoc)
+              using s_in_carrier by simp
             also have "\<dots> = (t \<otimes>\<^bsub>R\<^esub> d |\<^bsub>rel\<^esub> \<one>)"
               using fraction_rescale[OF td_rel s_in] by simp
             also have "\<dots> = rng_to_rng_of_frac (t \<otimes>\<^bsub>R\<^esub> d)"
@@ -1094,8 +1137,8 @@ proof -
             using x_eq_map_td t_unit_loc d_unit_loc by simp
         next
           assume b_unit: "b \<in> Units R"
-          then have "(b |\<^bsub>rel\<^esub> t) \<in> Units rec_rng_of_frac"
-            using fraction_unit_numerator_is_unit[OF b_unit t_in] .
+          have "(b |\<^bsub>rel\<^esub> t) \<in> Units rec_rng_of_frac"
+            by (rule fraction_unit_numerator_is_unit[OF b_unit t_in])
           then show ?thesis
             using y_def by blast
         qed
@@ -1107,8 +1150,14 @@ proof -
           using a_in d_in by auto
         have "p = a \<otimes>\<^bsub>R\<^esub> d"
         proof -
-          have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> d)"
-            using p_eq hd by (simp add: m_assoc)
+          have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = a \<otimes>\<^bsub>R\<^esub> b"
+            by (rule p_eq)
+          also have "\<dots> = a \<otimes>\<^bsub>R\<^esub> ((s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> d)"
+            using hd by simp
+          also have "\<dots> = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> d)"
+            using st_carrier a_in d_in by (simp add: m_assoc m_comm m_lcomm)
+          finally have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p =
+              (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> d)" .
           then show ?thesis
             using st_nz st_carrier p_in ad_in by (simp add: m_lcancel)
         qed
@@ -1117,8 +1166,8 @@ proof -
         then show ?thesis
         proof
           assume a_unit: "a \<in> Units R"
-          then have "(a |\<^bsub>rel\<^esub> s) \<in> Units rec_rng_of_frac"
-            using fraction_unit_numerator_is_unit[OF a_unit s_in] .
+          have "(a |\<^bsub>rel\<^esub> s) \<in> Units rec_rng_of_frac"
+            by (rule fraction_unit_numerator_is_unit[OF a_unit s_in])
           then show ?thesis
             using x_def by blast
         next
@@ -1131,12 +1180,16 @@ proof -
             using sd_in one_closed by (simp add: rel_def)
           have y_eq_map_sd: "y = rng_to_rng_of_frac (s \<otimes>\<^bsub>R\<^esub> d)"
           proof -
+            have t_in_carrier: "t \<in> carrier R"
+              using t_in subset rev_subsetD by blast
             have "y = (b |\<^bsub>rel\<^esub> t)"
               using y_def by simp
             also have "\<dots> = ((s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> d |\<^bsub>rel\<^esub> t)"
               using hd by (simp add: m_assoc)
+            also have "\<dots> = (t \<otimes>\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> d) |\<^bsub>rel\<^esub> t)"
+              using t_in_carrier s_in_carrier d_in by (simp add: m_assoc m_comm m_lcomm)
             also have "\<dots> = (t \<otimes>\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> d) |\<^bsub>rel\<^esub> t \<otimes>\<^bsub>R\<^esub> \<one>)"
-              using s_in_carrier d_in by (simp add: m_assoc m_comm m_lcomm)
+              using t_in_carrier by simp
             also have "\<dots> = (s \<otimes>\<^bsub>R\<^esub> d |\<^bsub>rel\<^esub> \<one>)"
               using fraction_rescale[OF sd_rel t_in] by simp
             also have "\<dots> = rng_to_rng_of_frac (s \<otimes>\<^bsub>R\<^esub> d)"
@@ -1158,29 +1211,92 @@ proof -
       assume hst_unit: "s \<otimes>\<^bsub>R\<^esub> t \<in> Units R"
       have ab_assoc_p: "(a \<otimes>\<^bsub>R\<^esub> b) \<sim>\<^bsub>R\<^esub> p"
       proof -
-        have "a \<otimes>\<^bsub>R\<^esub> b = p \<otimes>\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> t)"
-          using p_eq by (simp add: m_assoc m_comm m_lcomm)
+        have "a \<otimes>\<^bsub>R\<^esub> b = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p"
+          using p_eq by simp
+        also have "\<dots> = p \<otimes>\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> t)"
+          using p_in Units_closed[OF hst_unit] by (simp add: m_assoc m_comm m_lcomm)
+        finally have "a \<otimes>\<^bsub>R\<^esub> b = p \<otimes>\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> t)" .
         then show ?thesis
           using hst_unit p_in by (rule associatedI2')
       qed
-      have ab_irreducible: "irreducible R (a \<otimes>\<^bsub>R\<^esub> b)"
-        using irreducible_cong[
-            OF ring_irreducibleE(2)[OF p_in hp] associated_sym[OF ab_assoc_p] p_in ab_in
-          ] .
-      from irreducible_prodE[OF ab_irreducible a_in b_in] show ?thesis
+      have p_mult_irreducible: "irreducible (mult_of R) p"
+        using ring_irreducibleE(3)[OF p_in hp] .
+      have p_assoc_ab_mult: "p \<sim>\<^bsub>mult_of R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b)"
+        using assoc_iff_assoc_mult[OF p_in ab_in] associated_sym[OF ab_assoc_p] by blast
+      have st_carr: "s \<otimes>\<^bsub>R\<^esub> t \<in> carrier R"
+        using Units_closed[OF hst_unit] .
+      have st_nz: "s \<otimes>\<^bsub>R\<^esub> t \<noteq> \<zero>"
       proof
-        assume b_unit: "b \<in> Units R" and _a_irreducible: "irreducible R a"
-        then have "(b |\<^bsub>rel\<^esub> t) \<in> Units rec_rng_of_frac"
-          using fraction_unit_numerator_is_unit[OF b_unit t_in] by blast
-        then show ?thesis
-          using y_def by blast
-      next
-        assume a_unit: "a \<in> Units R" and _b_irreducible: "irreducible R b"
-        then have "(a |\<^bsub>rel\<^esub> s) \<in> Units rec_rng_of_frac"
-          using fraction_unit_numerator_is_unit[OF a_unit s_in] by blast
-        then show ?thesis
-          using x_def by blast
+        assume st_zero: "s \<otimes>\<^bsub>R\<^esub> t = \<zero>"
+        have "s \<otimes>\<^bsub>R\<^esub> t \<in> Units (mult_of R)"
+          using hst_unit by simp
+        then have "s \<otimes>\<^bsub>R\<^esub> t \<in> carrier (mult_of R)"
+          unfolding Units_def by blast
+        then show False
+          using st_zero by simp
       qed
+      have p_nz: "p \<noteq> \<zero>"
+        using ring_irreducibleE(1)[OF p_in hp] .
+      have ab_nz: "a \<otimes>\<^bsub>R\<^esub> b \<noteq> \<zero>"
+      proof
+        assume ab_zero: "a \<otimes>\<^bsub>R\<^esub> b = \<zero>"
+        have "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = \<zero>"
+          using p_eq ab_zero by simp
+        then show False
+          using st_carr st_nz p_in p_nz by (simp add: integral_iff)
+      qed
+      have a_nz: "a \<noteq> \<zero>"
+      proof
+        assume a_zero: "a = \<zero>"
+        have "a \<otimes>\<^bsub>R\<^esub> b = \<zero>"
+          using b_in a_zero by simp
+        then show False
+          using ab_nz by simp
+      qed
+      have b_nz: "b \<noteq> \<zero>"
+      proof
+        assume b_zero: "b = \<zero>"
+        have "a \<otimes>\<^bsub>R\<^esub> b = \<zero>"
+          using a_in b_zero by simp
+        then show False
+          using ab_nz by simp
+      qed
+      have a_in_mult: "a \<in> carrier (mult_of R)"
+        using a_in a_nz by simp
+      have b_in_mult: "b \<in> carrier (mult_of R)"
+        using b_in b_nz by simp
+      have ab_mult_irreducible: "irreducible (mult_of R) (a \<otimes>\<^bsub>R\<^esub> b)"
+      proof (rule mult_of.irreducible_cong[OF p_mult_irreducible p_assoc_ab_mult])
+        show "p \<in> carrier (mult_of R)"
+          using p_in p_nz by simp
+        show "(a \<otimes>\<^bsub>R\<^esub> b) \<in> carrier (mult_of R)"
+          using ab_in ab_nz by simp
+      qed
+      have xy_unit: "x \<in> Units rec_rng_of_frac \<or> y \<in> Units rec_rng_of_frac"
+      proof (rule mult_of.irreducible_prodE[OF ab_mult_irreducible a_in_mult b_in_mult])
+        assume a_irreducible: "irreducible (mult_of R) a" and b_unit_mult: "b \<in> Units (mult_of R)"
+        have b_unit: "b \<in> Units R"
+          using b_unit_mult by simp
+        have y_unit: "y \<in> Units rec_rng_of_frac"
+          unfolding y_def using fraction_unit_numerator_is_unit[OF b_unit t_in] by blast
+        show "x \<in> Units rec_rng_of_frac \<or> y \<in> Units rec_rng_of_frac"
+        proof (rule disjI2)
+          show "y \<in> Units rec_rng_of_frac"
+            by (rule y_unit)
+        qed
+      next
+        assume a_unit_mult: "a \<in> Units (mult_of R)" and b_irreducible: "irreducible (mult_of R) b"
+        have a_unit: "a \<in> Units R"
+          using a_unit_mult by simp
+        have x_unit: "x \<in> Units rec_rng_of_frac"
+          unfolding x_def using fraction_unit_numerator_is_unit[OF a_unit s_in] by blast
+        show "x \<in> Units rec_rng_of_frac \<or> y \<in> Units rec_rng_of_frac"
+        proof (rule disjI1)
+          show "x \<in> Units rec_rng_of_frac"
+            by (rule x_unit)
+        qed
+      qed
+      then show ?thesis .
     qed
   qed
 qed
@@ -1206,17 +1322,19 @@ next
   have havoid: "ring_avoids R S p"
     using False unfolding ring_avoids_def by blast
   have loc_irreducible: "ring_irreducible\<^bsub>rec_rng_of_frac\<^esub> (rng_to_rng_of_frac p)"
-    using localization_irreducible_of_irreducible[OF hS L.domain_axioms p_in hp havoid] .
+    using localization_irreducible_of_irreducible[OF hS Lfd.domain_axioms p_in hp havoid] .
   have loc_irred_mult: "irreducible (mult_of rec_rng_of_frac) (rng_to_rng_of_frac p)"
-    using L.ring_irreducibleE(3)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible] .
-  have loc_in_mult: "rng_to_rng_of_frac p \<in> carrier (mult_of rec_rng_of_frac)"
+    using Lfd.ring_irreducibleE(3)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible] .
+  have loc_in_nz: "rng_to_rng_of_frac p \<in> carrier rec_rng_of_frac - {\<zero>\<^bsub>rec_rng_of_frac\<^esub>}"
     using ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in]
-      L.ring_irreducibleE(1)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible]
-    by simp
+      Lfd.ring_irreducibleE(1)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible]
+    by blast
+  have loc_in_mult: "rng_to_rng_of_frac p \<in> carrier (mult_of rec_rng_of_frac)"
+    using loc_in_nz by simp
   have loc_prime_mult: "prime (mult_of rec_rng_of_frac) (rng_to_rng_of_frac p)"
-    using Lfd.mult_of.irreducible_prime[OF loc_irred_mult loc_in_mult] .
+    by (rule factorial_monoid.irreducible_prime[OF Lfd.factorial_monoid_axioms loc_irred_mult loc_in_mult])
   have loc_ring_prime: "ring_prime\<^bsub>rec_rng_of_frac\<^esub> (rng_to_rng_of_frac p)"
-    using L.ring_primeI'[OF loc_in_mult loc_prime_mult] .
+    using Lfd.ring_primeI'[OF loc_in_nz loc_prime_mult] .
   show ?thesis
     using prime_of_localization_prime[OF hS p_in hp havoid loc_ring_prime] .
 qed
@@ -1232,18 +1350,43 @@ lemma split_prime_factors_of_mul_eq:
     and b_in: "b \<in> carrier R"
     and hEq: "p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) fs \<one>\<^bsub>R\<^esub> = a \<otimes>\<^bsub>R\<^esub> b"
   shows "\<exists>fs1 fs2 a' b'.
-      fs = fs1 @ fs2 \<and>
+      fs <~~> fs1 @ fs2 \<and>
       set fs1 \<subseteq> S \<and> (\<forall>q\<in>set fs1. ring_prime\<^bsub>R\<^esub> q) \<and>
       set fs2 \<subseteq> S \<and> (\<forall>q\<in>set fs2. ring_prime\<^bsub>R\<^esub> q) \<and>
       a' \<in> carrier R \<and> b' \<in> carrier R \<and>
       a = foldr (\<otimes>\<^bsub>R\<^esub>) fs1 \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a' \<and>
       b = foldr (\<otimes>\<^bsub>R\<^esub>) fs2 \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> b' \<and>
       p = a' \<otimes>\<^bsub>R\<^esub> b'"
+  using fs_sub hf p_in a_in b_in hEq
 proof (induction fs arbitrary: a b)
   case Nil
+  have hpab_eq: "p \<otimes>\<^bsub>R\<^esub> \<one>\<^bsub>R\<^esub> = a \<otimes>\<^bsub>R\<^esub> b"
+    using Nil.prems(6) by simp
+  have hpab: "p = a \<otimes>\<^bsub>R\<^esub> b"
+    using Nil.prems(3) hpab_eq by simp
   show ?case
-    by (rule exI[of _ "[]"], rule exI[of _ "[]"], rule exI[of _ a], rule exI[of _ b])
-       (use Nil.prems in auto)
+  proof (intro exI conjI)
+    show "[] <~~> [] @ []"
+      by simp
+    show "set [] \<subseteq> S"
+      by simp
+    show "\<forall>q\<in>set []. ring_prime\<^bsub>R\<^esub> q"
+      by simp
+    show "set [] \<subseteq> S"
+      by simp
+    show "\<forall>q\<in>set []. ring_prime\<^bsub>R\<^esub> q"
+      by simp
+    show "a \<in> carrier R"
+      by (rule Nil.prems(4))
+    show "b \<in> carrier R"
+      by (rule Nil.prems(5))
+    show "a = foldr (\<otimes>\<^bsub>R\<^esub>) [] \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a"
+      using Nil.prems(4) by simp
+    show "b = foldr (\<otimes>\<^bsub>R\<^esub>) [] \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> b"
+      using Nil.prems(5) by simp
+    show "p = a \<otimes>\<^bsub>R\<^esub> b"
+      by (rule hpab)
+  qed
 next
   case (Cons q qs)
   have q_in: "q \<in> S"
@@ -1268,12 +1411,23 @@ next
     using Cons.prems(3) rest_carr by auto
   have q_dvd_ab: "q divides\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b)"
   proof -
-    have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) = a \<otimes>\<^bsub>R\<^esub> b"
-      using Cons.prems(6) by (simp add: m_assoc m_comm m_lcomm)
-    then show ?thesis
-      unfolding factor_def using prest_carr by blast
+    have hEq_cons: "p \<otimes>\<^bsub>R\<^esub> (q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) = a \<otimes>\<^bsub>R\<^esub> b"
+      using Cons.prems(6) by simp
+    have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) =
+        p \<otimes>\<^bsub>R\<^esub> (q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>)"
+      using Cons.prems(3) q_carr rest_carr by (simp add: m_assoc m_comm m_lcomm)
+    also have "\<dots> = a \<otimes>\<^bsub>R\<^esub> b"
+      using hEq_cons .
+    finally have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) = a \<otimes>\<^bsub>R\<^esub> b" .
+    then have ab_eq: "a \<otimes>\<^bsub>R\<^esub> b =
+        q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>)"
+      by simp
+    show ?thesis
+      by (rule dividesI[OF prest_carr ab_eq])
   qed
-  from prime_divides[OF Cons.prems(4) Cons.prems(5) q_prime q_dvd_ab] show ?case
+  have q_dvd_a_or_b: "q divides\<^bsub>R\<^esub> a \<or> q divides\<^bsub>R\<^esub> b"
+    using primeE[OF q_prime] Cons.prems(4) Cons.prems(5) q_dvd_ab by blast
+  from q_dvd_a_or_b show ?case
   proof
     assume q_dvd_a: "q divides\<^bsub>R\<^esub> a"
     obtain a1 where a1_in: "a1 \<in> carrier R" and ha1: "a = q \<otimes>\<^bsub>R\<^esub> a1"
@@ -1282,13 +1436,22 @@ next
       using a1_in Cons.prems(5) by auto
     have hEq': "p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> = a1 \<otimes>\<^bsub>R\<^esub> b"
     proof -
-      have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) = q \<otimes>\<^bsub>R\<^esub> (a1 \<otimes>\<^bsub>R\<^esub> b)"
-        using Cons.prems(6) ha1 by (simp add: m_assoc m_comm m_lcomm)
+      have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) =
+          p \<otimes>\<^bsub>R\<^esub> (q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>)"
+        using Cons.prems(3) q_carr rest_carr by (simp add: m_assoc m_comm m_lcomm)
+      also have "\<dots> = a \<otimes>\<^bsub>R\<^esub> b"
+        using Cons.prems(6) by simp
+      also have "\<dots> = (q \<otimes>\<^bsub>R\<^esub> a1) \<otimes>\<^bsub>R\<^esub> b"
+        using ha1 by simp
+      also have "\<dots> = q \<otimes>\<^bsub>R\<^esub> (a1 \<otimes>\<^bsub>R\<^esub> b)"
+        using q_carr a1_in Cons.prems(5) by (simp add: m_assoc)
+      finally have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) =
+          q \<otimes>\<^bsub>R\<^esub> (a1 \<otimes>\<^bsub>R\<^esub> b)" .
       then show ?thesis
         using q_nz q_carr prest_carr a1b_carr by (simp add: m_lcancel)
     qed
     obtain fs1 fs2 a' b' where
-        part: "qs = fs1 @ fs2"
+        part: "qs <~~> fs1 @ fs2"
         and fs1_sub: "set fs1 \<subseteq> S"
         and fs1_prime: "\<forall>r\<in>set fs1. ring_prime\<^bsub>R\<^esub> r"
         and fs2_sub: "set fs2 \<subseteq> S"
@@ -1301,7 +1464,7 @@ next
       using Cons.IH[OF qs_sub qs_prime Cons.prems(3) a1_in Cons.prems(5) hEq'] by blast
     show ?thesis
     proof (intro exI conjI)
-      show "q # qs = (q # fs1) @ fs2"
+      show "q # qs <~~> (q # fs1) @ fs2"
         using part by simp
       show "set (q # fs1) \<subseteq> S"
         using q_in fs1_sub by simp
@@ -1316,7 +1479,21 @@ next
       show "b' \<in> carrier R"
         by (rule b'_in)
       show "a = foldr (\<otimes>\<^bsub>R\<^esub>) (q # fs1) \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a'"
-        using ha1 ha by (simp add: m_assoc)
+      proof -
+        have fs1_carr: "set fs1 \<subseteq> carrier R"
+          using fs1_sub subset by blast
+        have fs1_prod_carr: "foldr (\<otimes>\<^bsub>R\<^esub>) fs1 \<one>\<^bsub>R\<^esub> \<in> carrier R"
+          by (rule multlist_closed[OF fs1_carr])
+        have "a = q \<otimes>\<^bsub>R\<^esub> a1"
+          by (rule ha1)
+        also have "\<dots> = q \<otimes>\<^bsub>R\<^esub> (foldr (\<otimes>\<^bsub>R\<^esub>) fs1 \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a')"
+          using ha by simp
+        also have "\<dots> = (q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) fs1 \<one>\<^bsub>R\<^esub>) \<otimes>\<^bsub>R\<^esub> a'"
+          using q_carr fs1_prod_carr a'_in by (simp add: m_assoc)
+        also have "\<dots> = foldr (\<otimes>\<^bsub>R\<^esub>) (q # fs1) \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a'"
+          by simp
+        finally show ?thesis .
+      qed
       show "b = foldr (\<otimes>\<^bsub>R\<^esub>) fs2 \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> b'"
         by (rule hb)
       show "p = a' \<otimes>\<^bsub>R\<^esub> b'"
@@ -1330,13 +1507,22 @@ next
       using Cons.prems(4) b1_in by auto
     have hEq': "p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub> = a \<otimes>\<^bsub>R\<^esub> b1"
     proof -
-      have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) = q \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b1)"
-        using Cons.prems(6) hb1 by (simp add: m_assoc m_comm m_lcomm)
+      have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) =
+          p \<otimes>\<^bsub>R\<^esub> (q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>)"
+        using Cons.prems(3) q_carr rest_carr by (simp add: m_assoc m_comm m_lcomm)
+      also have "\<dots> = a \<otimes>\<^bsub>R\<^esub> b"
+        using Cons.prems(6) by simp
+      also have "\<dots> = a \<otimes>\<^bsub>R\<^esub> (q \<otimes>\<^bsub>R\<^esub> b1)"
+        using hb1 by simp
+      also have "\<dots> = q \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b1)"
+        using q_carr Cons.prems(4) b1_in by (simp add: m_assoc m_comm m_lcomm)
+      finally have "q \<otimes>\<^bsub>R\<^esub> (p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) qs \<one>\<^bsub>R\<^esub>) =
+          q \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b1)" .
       then show ?thesis
         using q_nz q_carr prest_carr ab1_carr by (simp add: m_lcancel)
     qed
     obtain fs1 fs2 a' b' where
-        part: "qs = fs1 @ fs2"
+        part: "qs <~~> fs1 @ fs2"
         and fs1_sub: "set fs1 \<subseteq> S"
         and fs1_prime: "\<forall>r\<in>set fs1. ring_prime\<^bsub>R\<^esub> r"
         and fs2_sub: "set fs2 \<subseteq> S"
@@ -1349,7 +1535,7 @@ next
       using Cons.IH[OF qs_sub qs_prime Cons.prems(3) Cons.prems(4) b1_in hEq'] by blast
     show ?thesis
     proof (intro exI conjI)
-      show "q # qs = fs1 @ (q # fs2)"
+      show "q # qs <~~> fs1 @ (q # fs2)"
         using part by simp
       show "set fs1 \<subseteq> S"
         by (rule fs1_sub)
@@ -1366,7 +1552,21 @@ next
       show "a = foldr (\<otimes>\<^bsub>R\<^esub>) fs1 \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> a'"
         by (rule ha)
       show "b = foldr (\<otimes>\<^bsub>R\<^esub>) (q # fs2) \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> b'"
-        using hb1 hb by (simp add: m_assoc)
+      proof -
+        have fs2_carr: "set fs2 \<subseteq> carrier R"
+          using fs2_sub subset by blast
+        have fs2_prod_carr: "foldr (\<otimes>\<^bsub>R\<^esub>) fs2 \<one>\<^bsub>R\<^esub> \<in> carrier R"
+          by (rule multlist_closed[OF fs2_carr])
+        have "b = q \<otimes>\<^bsub>R\<^esub> b1"
+          by (rule hb1)
+        also have "\<dots> = q \<otimes>\<^bsub>R\<^esub> (foldr (\<otimes>\<^bsub>R\<^esub>) fs2 \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> b')"
+          using hb by simp
+        also have "\<dots> = (q \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) fs2 \<one>\<^bsub>R\<^esub>) \<otimes>\<^bsub>R\<^esub> b'"
+          using q_carr fs2_prod_carr b'_in by (simp add: m_assoc)
+        also have "\<dots> = foldr (\<otimes>\<^bsub>R\<^esub>) (q # fs2) \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> b'"
+          by simp
+        finally show ?thesis .
+      qed
       show "p = a' \<otimes>\<^bsub>R\<^esub> b'"
         by (rule hp')
     qed
@@ -1383,19 +1583,23 @@ lemma localization_irreducible_of_irreducible_prime_generated:
 proof -
   interpret L: domain rec_rng_of_frac
     by (rule loc_dom)
+  have zero_notin: "\<zero> \<notin> S"
+    using zero_notin_submonoid_of_prime_generated[OF hS] .
   have map_p_in: "rng_to_rng_of_frac p \<in> carrier rec_rng_of_frac"
-    using ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] .
+    by (rule ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in])
+  have map_p_nz: "rng_to_rng_of_frac p \<noteq> \<zero>\<^bsub>rec_rng_of_frac\<^esub>"
+    using map_eq_zero_iff[OF p_in zero_notin no_zero_divisors]
+      ring_irreducibleE(1)[OF p_in hp]
+    by blast
   have map_p_not_unit: "rng_to_rng_of_frac p \<notin> Units rec_rng_of_frac"
   proof -
-    have zero_notin: "\<zero> \<notin> S"
-      using zero_notin_submonoid_of_prime_generated[OF hS] .
     show ?thesis
       using map_irreducible_not_unit_of_zero_notin[OF zero_notin loc_dom p_in hp havoid] .
   qed
   show ?thesis
-  proof (rule L.ring_irreducibleI')
-    show "rng_to_rng_of_frac p \<in> carrier rec_rng_of_frac"
-      by (rule map_p_in)
+  proof (rule L.ring_irreducibleI)
+    show "rng_to_rng_of_frac p \<in> carrier rec_rng_of_frac - {\<zero>\<^bsub>rec_rng_of_frac\<^esub>}"
+      using map_p_in map_p_nz by blast
     show "rng_to_rng_of_frac p \<notin> Units rec_rng_of_frac"
       by (rule map_p_not_unit)
     fix x y
@@ -1418,8 +1622,6 @@ proof -
         t_in: "t \<in> S"
         and y_def: "y = (b |\<^bsub>rel\<^esub> t)"
       by blast
-    have zero_notin: "\<zero> \<notin> S"
-      using zero_notin_submonoid_of_prime_generated[OF hS] .
     have s_carr: "s \<in> carrier R"
       using s_in subset rev_subsetD by blast
     have t_carr: "t \<in> carrier R"
@@ -1440,17 +1642,28 @@ proof -
     have ab_rel: "(a \<otimes>\<^bsub>R\<^esub> b, s \<otimes>\<^bsub>R\<^esub> t) \<in> carrier rel"
       using a_in b_in s_in t_in by (simp add: rel_def)
     have frac_prod: "x \<otimes>\<^bsub>rec_rng_of_frac\<^esub> y = (a \<otimes>\<^bsub>R\<^esub> b |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> t)"
-      using mult_rng_of_frac_fundamental_lemma[OF as_rel bt_rel] x_def y_def
-      by (simp add: rec_monoid_rng_of_frac_def rec_rng_of_frac_def)
+      using fraction_mult_rep[OF as_rel bt_rel] x_def y_def by simp
     have eq_frac: "rng_to_rng_of_frac p = (a \<otimes>\<^bsub>R\<^esub> b |\<^bsub>rel\<^esub> s \<otimes>\<^bsub>R\<^esub> t)"
       using xy frac_prod by (simp add: rng_to_rng_of_frac_def)
-    have hEq_cross: "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = a \<otimes>\<^bsub>R\<^esub> b"
+    have hEq_cross_raw: "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p =
+        \<one>\<^bsub>R\<^esub> \<otimes>\<^bsub>R\<^esub> (a \<otimes>\<^bsub>R\<^esub> b)"
       using fraction_eq_iff_cross_multiply[OF p_rel ab_rel zero_notin no_zero_divisors] eq_frac
-      by simp
+      unfolding rng_to_rng_of_frac_def by simp
+    have hEq_cross: "(s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p = a \<otimes>\<^bsub>R\<^esub> b"
+      using hEq_cross_raw a_in b_in by simp
     have hEq: "p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) fs \<one>\<^bsub>R\<^esub> = a \<otimes>\<^bsub>R\<^esub> b"
-      using hEq_cross by (simp add: hprod m_assoc m_comm m_lcomm)
+    proof -
+      have "p \<otimes>\<^bsub>R\<^esub> foldr (\<otimes>\<^bsub>R\<^esub>) fs \<one>\<^bsub>R\<^esub> =
+          p \<otimes>\<^bsub>R\<^esub> (s \<otimes>\<^bsub>R\<^esub> t)"
+        using hprod by simp
+      also have "\<dots> = (s \<otimes>\<^bsub>R\<^esub> t) \<otimes>\<^bsub>R\<^esub> p"
+        using p_in s_carr t_carr by (simp add: m_assoc m_comm m_lcomm)
+      also have "\<dots> = a \<otimes>\<^bsub>R\<^esub> b"
+        by (rule hEq_cross)
+      finally show ?thesis .
+    qed
     obtain fs1 fs2 a' b' where
-        part: "fs = fs1 @ fs2"
+        part: "fs <~~> fs1 @ fs2"
         and fs1_sub: "set fs1 \<subseteq> S"
         and fs1_prime: "\<forall>q\<in>set fs1. ring_prime\<^bsub>R\<^esub> q"
         and fs2_sub: "set fs2 \<subseteq> S"
@@ -1509,7 +1722,7 @@ proof -
       have prod1_unit: "rng_to_rng_of_frac (foldr (\<otimes>\<^bsub>R\<^esub>) fs1 \<one>\<^bsub>R\<^esub>) \<in> Units rec_rng_of_frac"
         using map_submonoid_elem_is_unit[OF prod1_mem] .
       have frac1_unit: "(a' |\<^bsub>rel\<^esub> s) \<in> Units rec_rng_of_frac"
-        using fraction_unit_numerator_is_unit[OF a'_unit s_in] .
+        by (rule fraction_unit_numerator_is_unit[OF a'_unit s_in])
       show ?thesis
         using x_eq prod1_unit frac1_unit by simp
     next
@@ -1517,7 +1730,7 @@ proof -
       have prod2_unit: "rng_to_rng_of_frac (foldr (\<otimes>\<^bsub>R\<^esub>) fs2 \<one>\<^bsub>R\<^esub>) \<in> Units rec_rng_of_frac"
         using map_submonoid_elem_is_unit[OF prod2_mem] .
       have frac2_unit: "(b' |\<^bsub>rel\<^esub> t) \<in> Units rec_rng_of_frac"
-        using fraction_unit_numerator_is_unit[OF b'_unit t_in] .
+        by (rule fraction_unit_numerator_is_unit[OF b'_unit t_in])
       show ?thesis
         using y_eq prod2_unit frac2_unit by simp
     qed
@@ -1531,15 +1744,15 @@ lemma prime_of_localization_prime_prime_generated:
     and havoid: "ring_avoids R S p"
     and hploc: "ring_prime\<^bsub>rec_rng_of_frac\<^esub> (rng_to_rng_of_frac p)"
   shows "ring_prime\<^bsub>R\<^esub> p"
-proof (rule ring_primeI')
-  show "p \<in> carrier R"
-    by (rule p_in)
+proof -
+  have p_nz: "p \<noteq> \<zero>"
+    using ring_irreducibleE(1)[OF p_in hp] .
   have hloc_prime: "prime rec_rng_of_frac (rng_to_rng_of_frac p)"
-    using ring_primeE(3)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] hploc] .
-  show "prime R p"
+    using hploc unfolding ring_prime_def by simp
+  have p_prime: "prime R p"
   proof (rule primeI)
-    show "p \<noteq> \<zero>"
-      using ring_irreducibleE(3)[OF p_in hp] .
+    show "p \<notin> Units R"
+      using ring_irreducibleE(4)[OF p_in hp] .
     fix a b
     assume a_in: "a \<in> carrier R"
       and b_in: "b \<in> carrier R"
@@ -1557,7 +1770,14 @@ proof (rule ring_primeI')
       have map_factor:
           "rng_to_rng_of_frac (a \<otimes>\<^bsub>R\<^esub> b) =
             rng_to_rng_of_frac p \<otimes>\<^bsub>rec_rng_of_frac\<^esub> rng_to_rng_of_frac d"
-        using hfactor d_in by simp
+      proof -
+        have map_pd:
+            "rng_to_rng_of_frac (p \<otimes>\<^bsub>R\<^esub> d) =
+              rng_to_rng_of_frac p \<otimes>\<^bsub>rec_rng_of_frac\<^esub> rng_to_rng_of_frac d"
+          using ring_hom_mult[OF rng_to_rng_of_frac_is_ring_hom p_in d_in] by simp
+        show ?thesis
+          using hfactor map_pd by simp
+      qed
       show ?thesis
         unfolding factor_def using d_in map_prod map_factor
         by (blast intro: ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom])
@@ -1584,6 +1804,8 @@ proof (rule ring_primeI')
         dvd_of_localization_dvd_prime_generated[OF hS p_in b_in hp havoid]
       by blast
   qed
+  from p_nz p_prime show ?thesis
+    by (rule ring_primeI)
 qed
 
 lemma nagata_key_lemma_prime_generated:
@@ -1607,17 +1829,19 @@ next
   have havoid: "ring_avoids R S p"
     using False unfolding ring_avoids_def by blast
   have loc_irreducible: "ring_irreducible\<^bsub>rec_rng_of_frac\<^esub> (rng_to_rng_of_frac p)"
-    using localization_irreducible_of_irreducible_prime_generated[OF hS L.domain_axioms p_in hp havoid] .
+    using localization_irreducible_of_irreducible_prime_generated[OF hS Lfd.domain_axioms p_in hp havoid] .
   have loc_irred_mult: "irreducible (mult_of rec_rng_of_frac) (rng_to_rng_of_frac p)"
-    using L.ring_irreducibleE(3)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible] .
-  have loc_in_mult: "rng_to_rng_of_frac p \<in> carrier (mult_of rec_rng_of_frac)"
+    using Lfd.ring_irreducibleE(3)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible] .
+  have loc_in_nz: "rng_to_rng_of_frac p \<in> carrier rec_rng_of_frac - {\<zero>\<^bsub>rec_rng_of_frac\<^esub>}"
     using ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in]
-      L.ring_irreducibleE(1)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible]
-    by simp
+      Lfd.ring_irreducibleE(1)[OF ring_hom_closed[OF rng_to_rng_of_frac_is_ring_hom p_in] loc_irreducible]
+    by blast
+  have loc_in_mult: "rng_to_rng_of_frac p \<in> carrier (mult_of rec_rng_of_frac)"
+    using loc_in_nz by simp
   have loc_prime_mult: "prime (mult_of rec_rng_of_frac) (rng_to_rng_of_frac p)"
-    using Lfd.mult_of.irreducible_prime[OF loc_irred_mult loc_in_mult] .
+    by (rule factorial_monoid.irreducible_prime[OF Lfd.factorial_monoid_axioms loc_irred_mult loc_in_mult])
   have loc_ring_prime: "ring_prime\<^bsub>rec_rng_of_frac\<^esub> (rng_to_rng_of_frac p)"
-    using L.ring_primeI'[OF loc_in_mult loc_prime_mult] .
+    using Lfd.ring_primeI'[OF loc_in_nz loc_prime_mult] .
   show ?thesis
     using prime_of_localization_prime_prime_generated[OF hS p_in hp havoid loc_ring_prime] .
 qed
@@ -1635,17 +1859,35 @@ proof -
     fix a
     assume a_in: "a \<in> carrier (mult_of R)"
       and a_irred: "irreducible (mult_of R) a"
+    have a_in_R: "a \<in> carrier R - {\<zero>}"
+      using a_in by simp
     have a_ring_irred: "ring_irreducible\<^bsub>R\<^esub> a"
-      using N.ring_irreducibleI[OF a_in a_irred] .
+      using ring_irreducibleI'[OF a_in_R a_irred] .
     have a_prime: "ring_prime\<^bsub>R\<^esub> a"
-      using nagata_key_lemma_prime_generated[OF hS loc_fd a_in a_ring_irred] .
+      using nagata_key_lemma_prime_generated[OF hS loc_fd DiffD1[OF a_in_R] a_ring_irred] .
     have a_prime_mult: "prime (mult_of R) a"
-      using N.ring_primeE(3)[OF a_in a_prime] .
+      using ring_primeE(2)[OF DiffD1[OF a_in_R] a_prime] .
     show "prime (mult_of R) a"
       by (rule a_prime_mult)
   qed
+  have wfactors_exist_mult:
+      "\<And>a. \<lbrakk>a \<in> carrier (mult_of R); a \<notin> Units (mult_of R)\<rbrakk> \<Longrightarrow>
+        \<exists>fs. set fs \<subseteq> carrier (mult_of R) \<and> wfactors (mult_of R) fs a"
+  proof -
+    fix a
+    assume a_in: "a \<in> carrier (mult_of R)"
+      and a_not_unit: "a \<notin> Units (mult_of R)"
+    have a_in_R: "a \<in> carrier R - {\<zero>}"
+      using a_in by simp
+    have a_not_unit_R: "a \<notin> Units R"
+      using a_not_unit by simp
+    show "\<exists>fs. set fs \<subseteq> carrier (mult_of R) \<and> wfactors (mult_of R) fs a"
+      using N.factorization_property[OF a_in_R a_not_unit_R] .
+  qed
+  have factorial_mult: "factorial_monoid (mult_of R)"
+    by (rule mult_of.factorial_monoidI[OF wfactors_exist_mult PC.wfactors_unique])
   show ?thesis
-    by (rule N.factorial_domain_axioms[OF PC.primeness_condition_axioms])
+    unfolding factorial_domain_def using domain_axioms factorial_mult by simp
 qed
 
 lemma nagata_theorem_of_prime_or_unit:
@@ -1685,10 +1927,35 @@ proof -
       using N.factorization_property[OF a_in_R a_not_unit_R] .
   qed
   have factorial_mult: "factorial_monoid (mult_of R)"
-    by (rule factorial_monoidI[OF wfactors_exist_mult PC.wfactors_unique])
+    by (rule mult_of.factorial_monoidI[OF wfactors_exist_mult PC.wfactors_unique])
   show ?thesis
     unfolding factorial_domain_def using domain_axioms factorial_mult by simp
 qed
+
+lemma nagata_theorem_of_prime_generators:
+  assumes noeth: "noetherian_domain R"
+    and S_eq: "S = ring_mult_submonoid_closure R A"
+    and A_sub: "A \<subseteq> carrier R"
+    and hprime: "\<And>q. q \<in> A \<Longrightarrow> ring_prime\<^bsub>R\<^esub> q"
+    and loc_fd: "factorial_domain rec_rng_of_frac"
+  shows "factorial_domain R"
+proof -
+  have hS: "ring_prime_generated R S"
+    unfolding S_eq
+    by (rule ring_prime_generated_mult_submonoid_closure[OF ring_axioms A_sub hprime])
+  show ?thesis
+    by (rule nagata_theorem[OF noeth hS loc_fd])
+qed
+
+lemma nagata_theorem_of_finite_prime_generators:
+  assumes noeth: "noetherian_domain R"
+    and finA: "finite A"
+    and S_eq: "S = ring_mult_submonoid_closure R A"
+    and A_sub: "A \<subseteq> carrier R"
+    and hprime: "\<And>q. q \<in> A \<Longrightarrow> ring_prime\<^bsub>R\<^esub> q"
+    and loc_fd: "factorial_domain rec_rng_of_frac"
+  shows "factorial_domain R"
+  using finA nagata_theorem_of_prime_generators[OF noeth S_eq A_sub hprime loc_fd] by blast
 
 end
 
